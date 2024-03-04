@@ -1,25 +1,35 @@
 # client
 
-## Project setup
+## STARTING BACKEND
+NEWTAB
 ```
-npm install
+cd ~/sites/PEVN-SITE/PEVN
+postgres -D /usr/local/pgsql/data >logfile 2>&1 &
+sudo -u postgres psql
 ```
 
-### Compiles and hot-reloads for development
+### NEWTAB RUN DEV
 ```
+cd ~/sites/PEVN-SITE/PEVN-OAUTH-SERVER
+npm run dev
+```
+
+### NEWTAB STARTING FRONTEND
+```
+cd ~/sites/PEVN-SITE/PEVN-OAUTH-CLIENT
 npm run serve
 ```
 
-### Compiles and minifies for production
+### OPEN BROWSER
 ```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
+http://localhost:8081/
 ```
 
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
-# eaglepass-heliski
+###OAUTH SERVER
+```
+/home/pevn/sites/PEVN-SITE/PEVN-OATH-CLIENT/fusionauth/bin/startup.sh
+```
+
+```
+http://localhost:9011
+```
