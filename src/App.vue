@@ -19,8 +19,8 @@
       <nav class="navbar navbar-expand-lg navbar-custom">
         <!-- Logo, Brand name -->
         <div style="padding-left: 2%; padding-right: 50px;">
-          <img style="height:40px; margin-right:px;" src="https://eaglepassheli.com/resources/themes/eaglepass/img/logo.svg?m=1690981199">
-          <router-link to="/" style="color: white;margin-left: 10px;" class="navbar-brand">Mechski Office</router-link>
+          <img style="height:40px; margin-right:px;" src="~@/assets/logo.svg">
+          <router-link to="/" style="color: white;margin-left: 10px;" class="navbar-brand">EagleEX Office</router-link>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -59,15 +59,8 @@
               </ul>
             </li>
             <!-- Reports Dropdown -->
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle" href="#" id="reportsDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Reports
-              </a>
-              <ul class="dropdown-menu" aria-labelledby="reportsDropdown">
-                <router-link to="/environmental" class="dropdown-item">Environmental</router-link>
-                <router-link to="/dropdown1" class="dropdown-item">Dropdown1</router-link>
-                <router-link to="/dropdown2" class="dropdown-item">Dropdown2</router-link>
-              </ul>
+            <li class="nav-item">
+              <router-link to="/generatereports" class="nav-link">Reports</router-link>
             </li>
             <!-- Testing Dropdown -->
             <li class="nav-item dropdown">
@@ -104,8 +97,8 @@
       <nav class="navbar navbar-expand-lg navbar-custom">
         <!-- Logo, Brand name -->
         <div style="padding-left: 2%; padding-right: 50px;">
-          <img style="height:40px; margin-right:10px;" src="https://eaglepassheli.com/resources/themes/eaglepass/img/logo.svg?m=1690981199">
-          <router-link to="/" style="color: white;margin-left: 10px;" class="navbar-brand">Mechski Guide</router-link>
+          <img style="height:40px; margin-right:10px;" src="~@/assets/logo.svg">
+          <router-link to="/" style="color: white;margin-left: 10px;" class="navbar-brand">EagleEx Guide</router-link>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdownGuide" aria-controls="navbarNavDropdownGuide" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
@@ -119,7 +112,7 @@
             </li>
             <!-- Reports Dropdown (if applicable, otherwise leave as a single link) -->
             <li class="nav-item">
-              <router-link to="/reports" class="nav-link">Reports</router-link>
+              <router-link to="/generatereports" class="nav-link">Reports</router-link>
             </li>
             <!-- Other dropdowns as required -->
             <!-- ... other dropdowns ... -->

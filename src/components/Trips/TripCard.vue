@@ -2,10 +2,32 @@
 
   <div class="trip-card card">
 
-    <div class="card-header d-flex justify-content-between align-items-center">
-      <div>
+    <div class="card-header">
+      <div class="row">
         <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
         <p>Trip ID: {{ tripData.tripid }}</p>
+      </div>
+      <div class=" row pilots-helicopters-section">
+        <!-- Pilots Section -->
+        <div class="pilots-section">
+          <label>Pilot:</label>
+          <select v-model="editableTripData.pilotId" class="form-select">
+            <option disabled value="">Select a Pilot</option>
+            <option v-for="pilot in allPilots" :key="pilot.staffid" :value="pilot.staffid">
+              {{ pilot.person.firstname }} {{ pilot.person.lastname }}
+            </option>
+          </select>
+        </div>
+        <!-- Helicopters Section -->
+        <div class="helicopter-section">
+          <label>Helicopter:</label>
+          <select v-model="editableTripData.helicopterId" class="form-select">
+            <option disabled value="">Select a Helicopter</option>
+            <option v-for="helicopter in allHelicopters" :key="helicopter.helicopterid" :value="helicopter.helicopterid">
+              {{ helicopter.model }} ({{ helicopter.callsign }})
+            </option>
+          </select>
+        </div>
       </div>
       <button class="btn btn-danger" @click="confirmDeletion">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
@@ -32,25 +54,6 @@
 
       <div class="card-footer">
         <div class="row">
-          <div class="col-md-6">
-            <label>Pilots:</label>
-            <select v-model="editableTripData.pilotId" class="form-select">
-              <option disabled value="">Select a Pilot</option>
-              <option v-for="pilot in allPilots" :key="pilot.staffid" :value="pilot.staffid">
-                {{ pilot.person.firstname }} {{ pilot.person.lastname }}
-              </option>
-            </select>
-          </div>
-
-          <div class="col-md-6">
-            <label>Helicopters:</label>
-            <select v-model="editableTripData.helicopterId" class="form-select">
-              <option disabled value="">Select a Helicopter</option>
-              <option v-for="helicopter in allHelicopters" :key="helicopter.helicopterid" :value="helicopter.helicopterid">
-                {{ helicopter.model }} ({{ helicopter.callsign }})
-              </option>
-            </select>
-          </div>
         </div>
       </div>
       <div class="reservations-section card-body border-top">
@@ -285,18 +288,27 @@ export default {
 </script>
 
 <style scoped>
-
 @media (min-width: 768px) {
-  .trip-card .card-body .row > div {
-    padding-right: 5px; /* Adjust spacing between dropdowns */
-    padding-left: 5px; /* Adjust if necessary */
+  .trip-card .card-header > .pilot-helicopter-container {
+    display: flex; /* Enables flex container */
+    flex-wrap: wrap; /* Allows items to wrap as needed */
+  }
+
+  .trip-card .card-header > .pilot-helicopter-container > .pilots-section,
+  .trip-card .card-header > .pilot-helicopter-container > .helicopter-section {
+    flex: 1; /* Allows each section to take up equal space */
+    padding-right: 5px; /* Add some spacing between the two sections */
+  }
+
+  .trip-card .card-header > .pilot-helicopter-container > .helicopter-section {
+    padding-right: 0; /* No padding on the right for the last element */
   }
 }
+
 .trip-card {
-  /* Custom styles for modern look */
   box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
   transition: 0.3s;
-  border-radius: 5px; /* Rounded borders */
+  border-radius: 5px;
 }
 
 .trip-card:hover {
@@ -309,9 +321,23 @@ export default {
   top: 10px;
 }
 
+.pilot-helicopter-container {
+  display: flex;
+  justify-content: space-between; /* This will ensure the child divs take up equal space */
+}
+
+.pilots-section, .helicopter-section {
+  flex: 1; /* Each section will take up half the space */
+  padding-right: 5px; /* Add some spacing between the two sections */
+}
+
+.helicopter-section {
+  padding-right: 0; /* No padding on the right for the last element */
+}
+
 .card-header {
-  background-color: #f8f9fa; /* Bootstrap light grey */
-  border-bottom: 1px solid #e3e6ea; /* Slight separation from body */
+  background-color: #f8f9fa;
+  border-bottom: 1px solid #e3e6ea;
   position: relative;
 }
 
@@ -434,7 +460,7 @@ export default {
 
 /* Adjustments for form fields */
 select, textarea {
-  width: 100%; /* Full width */
-  margin-bottom: 10px; /* Spacing below each form field */
+  width: 100%;
+  margin-bottom: 10px;
 }
 </style>

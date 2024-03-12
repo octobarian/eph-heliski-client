@@ -40,6 +40,12 @@ const router = new Router({
       component: () => import('@/components/Reservations/Reservation.vue'),
       props: true
     },
+    //Reports Routes
+    {
+      path: "/generatereports",
+      name: "generatereports",
+      component: () => import("@/components/Reports/GenerateReports.vue")
+    },
 
     //Trip Routes
     {
