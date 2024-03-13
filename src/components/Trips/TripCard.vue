@@ -38,51 +38,38 @@
     </div>
 
     <div class="card-body">
-      <label>Guides:</label>
-      <div class="selected-guides">
-        <span class="guide-tag" v-for="(guide) in tripData.guides" :key="guide.personid">
-          {{ guide.firstname }} {{ guide.lastname }}
-          <button class="remove-guide" @click="removeGuide(guide)">x</button>
-        </span>
+      <!-- Trip Groups Section -->
+      <div class="trip-groups-header">
+        <h5 class="card-title">Trip Groups</h5>
+        <button class="btn btn-primary" @click="createNewGroup">New Group</button>
       </div>
-      <select v-model="selectedGuideId">
-        <option disabled value="">Select a Guide</option>
-        <option v-for="guide in availableGuides" :key="guide.staffid" :value="guide.staffid" :disabled="guide.isDisabled">
-          {{ guide.person.firstname }} {{ guide.person.lastname }}
-        </option>
-      </select>
-
-      <div class="card-footer">
-        <div class="row">
-        </div>
+      <div class="trip-groups-container">
+        <trip-group
+          v-for="(group, index) in tripData.groups"
+          :key="group.groupId"
+          :group-id="group.groupId"
+          :guide="group.guide"
+          :clients="group.clients"
+          :all-guides="allGuides"
+          @removeGuide="removeGuide"
+          @removeClient="removeClient"
+          @deleteGroup="deleteGroup(index)"
+        ></trip-group>
       </div>
-      <div class="reservations-section card-body border-top">
-        <h5 class="card-title">Reservations</h5>
-        <div class="selected-reservations">
-        <span class="reservation-tag" v-for="(reservation, index) in tripData.reservationPersons" :key="index">
-          {{ reservation.person.firstname }} {{ reservation.person.lastname }}
-          <button class="remove-reservation" @click="removeReservation(reservation.reservationid)">x</button>
-        </span>
-      </div>
-    </div>
-
       <TripWeight :tripData="tripData" @gearWeightUpdated="handleGearWeightUpdate" />
-
       <label>Notes:</label>
       <div class="notes-container">
         <textarea v-model="noteContent"></textarea>
         <button class="save-note" @click="saveNote">Save Note</button>
       </div>
-
     </div>
-
-
   </div>
 </template>
 
 <script>
 //components
 import TripWeight from './TripWeight.vue';
+import TripGroup from './TripGroup.vue';
 
 //services
 import TripDataService from '@/services/TripDataService';
@@ -118,14 +105,15 @@ export default {
   },
   components: {
     // Register the new component
-    TripWeight
+    TripWeight,
+    TripGroup
   },
   data() {
     return {
       selectedGuideId: '',
       editableTripData: {
-        pilotId: this.tripData.pilotid,
-        helicopterId: this.tripData.helicopterid,
+        pilotId: this.tripData.pilot.staffid,
+        helicopterId: this.tripData.helicopter.helicopterid,
         notes: this.tripData.notes,
         guides: this.tripData.guides || [],
       },
@@ -133,6 +121,7 @@ export default {
       noteContent: '',
       noteId: null,
       loggedInPersonId: null,
+      tripGroups: this.tripData.groups || [],
     };
   },
   watch: {
@@ -167,6 +156,9 @@ export default {
     }
   },
   methods: {
+    //TODO: make this create a new group
+    createNewGroup(){},
+
     fetchLoggedInPersonId() {
       const email = sessionStorage.getItem('email');
       if (email) {
@@ -319,6 +311,29 @@ export default {
   position: absolute;
   right: 10px;
   top: 10px;
+}
+
+.trip-groups-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.trip-groups-container {
+  margin-bottom: 15px;
+}
+
+.btn-primary {
+  /* Add this to give the button a red background */
+  background-color: var(--primary-text-eph-color);
+  /* Additional styling for the button */
+  padding: 5px 10px;
+  font-size: 14px;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
 }
 
 .pilot-helicopter-container {

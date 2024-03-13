@@ -25,42 +25,46 @@
       };
     },
     computed: {
-        totalPassengerWeight() {
-            let totalWeight = 0;
+      totalPassengerWeight() {
+        let totalWeight = 0;
 
-            // Add the pilot's weight
-            if (this.tripData.pilot && this.tripData.pilot.weight) {
-            totalWeight += parseFloat(this.tripData.pilot.weight);
-            }
-
-            // Add the weight of each guide
-            this.tripData.guides.forEach(guide => {
-                if (guide.weight) {
-                    totalWeight += parseFloat(guide.weight);
-                }
-            });
-
-            // Add the weight of each client from the reservations
-            this.tripData.reservationPersons.forEach(reservation => {
-                if (reservation.person && reservation.person.weight) {
-                    totalWeight += parseFloat(reservation.person.weight);
-                }
-            });
-
-            return totalWeight;
-        },
-        totalFuelPercentage() {
-            const totalWeight = this.totalPassengerWeight + this.totalGearWeight;
-            var helicopter = this.tripData.helicopter;
-            if (helicopter) {
-                const weightRemainder = helicopter.maxweight - totalWeight;
-                return (weightRemainder / helicopter.fuelamounttotal) * 100;
-            }
-        return 0;
-        },
-        isTooHeavy() {
-            return this.totalFuelPercentage < 20;
+        // Check if the pilot has a weight property
+        if (this.tripData.pilot && this.tripData.pilot.weight) {
+          totalWeight += parseFloat(this.tripData.pilot.weight);
         }
+
+        // Check if guides exist and if they have a weight property
+        if (this.tripData.guides) {
+          this.tripData.guides.forEach(guide => {
+            if (guide.weight) {
+              totalWeight += parseFloat(guide.weight);
+            }
+          });
+        }
+
+        // Check if reservationPersons exist and add their weights
+        if (this.tripData.reservationPersons) {
+          this.tripData.reservationPersons.forEach(reservation => {
+            if (reservation.person && reservation.person.weight) {
+              totalWeight += parseFloat(reservation.person.weight);
+            }
+          });
+        }
+
+        return totalWeight;
+      },
+      totalFuelPercentage() {
+          const totalWeight = this.totalPassengerWeight + this.totalGearWeight;
+          var helicopter = this.tripData.helicopter;
+          if (helicopter) {
+              const weightRemainder = helicopter.maxweight - totalWeight;
+              return (weightRemainder / helicopter.fuelamounttotal) * 100;
+          }
+      return 0;
+      },
+      isTooHeavy() {
+          return this.totalFuelPercentage < 20;
+      }
     },
     watch: {
         totalGearWeight(newVal, oldVal) {
