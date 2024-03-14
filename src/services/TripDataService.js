@@ -21,8 +21,18 @@ class TripDataService {
     return http.delete(`/trips/id/${id}`);
   }
 
-  // Add other methods as needed, like fetching specific trip details
+  deleteGroup(groupId) {
+    return http.delete(`/trips/group/${groupId}`);
+  }
 
+  createGroup(tripId) {
+    return http.post(`/trips/group/${tripId}`);
+  }  
+
+  updateGroupGuide(groupId, guideId) {
+    return http.put(`/trips/group/${groupId}/guide`, { guideId });
+  }
+  
   // Method to fetch guides
   fetchGuides() {
     return http.get("/staff/job/2");

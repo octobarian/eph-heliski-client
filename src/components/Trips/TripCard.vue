@@ -1,11 +1,9 @@
 <template>
-
   <div class="trip-card card">
-
     <div class="card-header">
       <div class="row">
         <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
-        <p>Trip ID: {{ tripData.tripid }}</p>
+        <p>Trip ID: {{ tripData.tripId }}</p>
       </div>
       <div class=" row pilots-helicopters-section">
         <!-- Pilots Section -->
@@ -45,15 +43,16 @@
       </div>
       <div class="trip-groups-container">
         <trip-group
-          v-for="(group, index) in tripData.groups"
-          :key="group.groupId"
-          :group-id="group.groupId"
+          v-for="(group) in tripData.groups"
+          :key="group.groupid"
+          :group-id="group.groupid"
           :guide="group.guide"
           :clients="group.clients"
           :all-guides="allGuides"
-          @removeGuide="removeGuide"
-          @removeClient="removeClient"
-          @deleteGroup="deleteGroup(index)"
+          @update:guide="(selectedGuideId, groupId) => handleUpdateGuide(selectedGuideId, groupId)"
+          @deleteGroup="() => handleDeleteGroup(group.groupid)"
+          @removeGuide="guide => handleRemoveGuide(guide)"
+          @removeClient="(client) => handleRemoveClient(client)"
         ></trip-group>
       </div>
       <TripWeight :tripData="tripData" @gearWeightUpdated="handleGearWeightUpdate" />
@@ -112,9 +111,9 @@ export default {
     return {
       selectedGuideId: '',
       editableTripData: {
-        pilotId: this.tripData.pilot.staffid,
-        helicopterId: this.tripData.helicopter.helicopterid,
-        notes: this.tripData.notes,
+        pilotId: this.tripData.pilot ? this.tripData.pilot.staffid : '',
+        helicopterId: this.tripData.helicopter ? this.tripData.helicopter.helicopterid : '',
+        notes: this.tripData.notes ? this.tripData.notes: [],
         guides: this.tripData.guides || [],
       },
       totalGearWeight: 0,
@@ -156,8 +155,55 @@ export default {
     }
   },
   methods: {
-    //TODO: make this create a new group
-    createNewGroup(){},
+    //TODO: Placeholder functions till program deals with it
+    createNewGroup() {
+      console.log('Creating a new group for trip ID:', this.tripData.tripId);
+      TripDataService.createGroup(this.tripData.tripId)
+          .then(response => {
+              console.log('New group created successfully:', response.data);
+              // Add the new group to the tripData.groups array to update the UI
+              this.tripData.groups.push(response.data);
+          })
+          .catch(error => {
+              console.error('Error creating new group:', error);
+              // Optionally, handle the error, e.g., by showing an error message
+          });
+    },
+    handleDeleteGroup(groupId) {
+      // Make sure you have a service to handle API requests
+      TripDataService.deleteGroup(groupId)
+        .then(() => {
+          console.log('Group deleted successfully');
+          // Remove the deleted group from the tripData.groups array
+          this.tripData.groups = this.tripData.groups.filter(group => group.groupid !== groupId);
+          // Optionally, you might want to emit an event to notify the parent component
+        })
+        .catch(error => {
+          console.error('Error deleting group:', error);
+          // Optionally, handle the error, e.g., by showing an error message to the user
+        });
+    },
+    handleRemoveGuide(guide) {
+      // Implement the logic to remove the guide from the group
+      console.log('Removing guide:', guide);
+      // Update your state or make an API call here
+    },
+    handleRemoveClient(clientInfo) {
+      // Implement the logic to remove the client from the group
+      console.log('Removing client with Trip_Client_ID:', clientInfo.tripClientId, 'from group');
+      // Adjust your state or call your API here
+    },
+    handleUpdateGuide(selectedGuideId, groupId) {
+      console.log(`Updating guide ${selectedGuideId} for group ${groupId}`);
+      TripDataService.updateGroupGuide(groupId, selectedGuideId)
+        .then(() => {
+          // Optionally, refresh the group or trip data here
+          console.log("Guide updated successfully");
+        })
+        .catch(error => {
+          console.error("Error updating guide:", error);
+        });
+  },
 
     fetchLoggedInPersonId() {
       const email = sessionStorage.getItem('email');
@@ -224,6 +270,7 @@ export default {
       // You can use this method to update the trip data or perform other actions
     },
     updateTrip() {
+      //TODO: Update to reflect new changes to how this data is updated (tripclient, trip_groups)
       // Generate guideIds, which can be an empty array if no guides are selected
       const guideIds = this.tripData.guides.map(guide => {
         const staffEntry = this.allGuides.find(g => g.person.personid === guide.personid);
