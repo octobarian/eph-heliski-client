@@ -38,7 +38,7 @@
     <div class="card-body">
       <!-- Trip Groups Section -->
       <div class="trip-groups-header">
-        <h5 class="card-title">Trip Groups</h5>
+        <h5 class="card-title">Heli Groups</h5>
         <button class="btn btn-primary" @click="createNewGroup">New Group</button>
       </div>
       <div class="trip-groups-container">
@@ -189,10 +189,18 @@ export default {
       // Update your state or make an API call here
     },
     handleRemoveClient(clientInfo) {
-      // Implement the logic to remove the client from the group
-      console.log('Removing client with Trip_Client_ID:', clientInfo.tripClientId, 'from group');
-      // Adjust your state or call your API here
+      console.log(clientInfo); // Log to verify structure
+      // Change clientId to tripClientId
+      TripDataService.removeClientFromGroup(clientInfo.groupId, clientInfo.tripClientId)
+        .then(() => {
+            console.log('Client removed from group successfully');
+            this.$emit('clientRemoved', clientInfo);
+        })
+        .catch(error => {
+            console.error('Error removing client from group:', error);
+        });
     },
+
     handleUpdateGuide(selectedGuideId, groupId) {
       console.log(`Updating guide ${selectedGuideId} for group ${groupId}`);
       TripDataService.updateGroupGuide(groupId, selectedGuideId)
@@ -203,7 +211,7 @@ export default {
         .catch(error => {
           console.error("Error updating guide:", error);
         });
-  },
+    },
 
     fetchLoggedInPersonId() {
       const email = sessionStorage.getItem('email');

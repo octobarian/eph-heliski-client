@@ -20,6 +20,7 @@
             :allHelicopters="helicopters"
             @tripDeleted="handleTripDeleted"
             @removeReservationFromTrip="handleRemoveReservationFromTrip"
+            @clientRemoved="handleClientRemoved"
           />
         </div>
         <div class="col-lg-6 col-md-12 mb-4 new-trip-card" @click="createNewTrip">
@@ -82,7 +83,12 @@ export default {
           console.error("Error fetching unassigned reservations:", error);
         });
     },
-    // In Greeting-Office.vue
+
+    // In Greeting-Office.vue, inside the methods object
+    handleClientRemoved() {
+        this.fetchTripsByDate(); // Refresh trip data
+        this.fetchUnassignedReservations(); // Refresh unassigned reservations
+    },
 
     handleReservationAssignment(data) {
       TripDataService.assignReservationToTrip(data)

@@ -75,9 +75,9 @@
     methods: {
         getAgeEmoji(age) {
             if (age < 18) {
-                return '🧒'; // Kid emoji
+                return '👶🏻'; // Kid emoji
             } else if (age > 65) {
-                return '👴'; // Grandpa emoji
+                return '👴🏻'; // Senior
             } else {
                 return ''; // No emoji for adults between 18 and 65
             }
@@ -85,23 +85,25 @@
         getAgeStyle(age) {
             if (age < 18) {
                 return {
+                fontSize: '25px',
                 backgroundColor: 'lightgreen',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: '50%',
-                width: '30px',
-                height: '30px'
+                width: '33px',
+                height: '33px'
                 };
             } else if (age > 64) {
                 return {
+                fontSize: '25px',
                 backgroundColor: 'lightcoral',
                 display: 'inline-flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 borderRadius: '50%',
-                width: '30px',
-                height: '30px'
+                width: '33px',
+                height: '33px'
                 };
             } else {
                 return {};
@@ -114,8 +116,11 @@
             this.$emit('removeGuide', guide);
         },
         emitRemoveClient(client) {
-            this.$emit('removeClient', client);
+            console.log(client); // This should now correctly log the client object
+            this.$emit('removeClient', { tripClientId: client.tripClientId, groupId: this.groupId });
         }
+
+
     },
     data() {
         return {
@@ -209,7 +214,7 @@
 
     .guide-section,
     .continue-section {
-    margin-bottom: 10px;
+        margin-bottom: 10px;
     }
 
     .guide-dropdown{
@@ -240,17 +245,17 @@
     }
 
     .dropdown-text {
-    display: block;
-    background-color: #fff;
-    padding: 5px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+        display: block;
+        background-color: #fff;
+        padding: 5px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
     }
 
     .continue-till-date {
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    padding: 5px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        padding: 5px;
     }
 
     .clients-section {
@@ -268,42 +273,42 @@
     }
 
     .client-tag {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background-color: #dedede;
-    border-radius: 16px;
-    padding: 5px 10px;
-    cursor: pointer;
-    transition: background-color 0.3s;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #dedede;
+        border-radius: 16px;
+        padding: 5px 10px;
+        cursor: pointer;
+        transition: background-color 0.3s;
     }
 
     .client-card {
-    background-color: #dedede;
-    border-radius: 8px;
-    padding: 10px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+        background-color: #dedede;
+        border-radius: 8px;
+        padding: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
     }
 
     .client-tag:hover {
-    background-color: #ccc;
+        background-color: #ccc;
     }
 
     .remove-client-btn {
-    margin-left: 8px;
-    background-color: #dc3545;
-    border: none;
-    border-radius: 50%;
-    color: white;
-    cursor: pointer;
-    padding: 0 6px;
-    line-height: 1.5;
+        margin-left: 8px;
+        background-color: #dc3545;
+        border: none;
+        border-radius: 50%;
+        color: white;
+        cursor: pointer;
+        padding: 0 6px;
+        line-height: 1.5;
     }
 
     .remove-client-btn:hover {
-    background-color: #c82333;
+        background-color: #c82333;
     }
 </style>
 

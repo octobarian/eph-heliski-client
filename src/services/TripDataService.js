@@ -25,6 +25,11 @@ class TripDataService {
     return http.delete(`/trips/group/${groupId}`);
   }
 
+  removeClientFromGroup(groupId, tripClientId) {
+    return http.delete(`/trips/group/${groupId}/tripClient/${tripClientId}`);
+  }
+  
+
   createGroup(tripId) {
     return http.post(`/trips/group/${tripId}`);
   }  
