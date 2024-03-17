@@ -43,16 +43,25 @@
         }
 
         // Check if reservationPersons exist and add their weights
-        if (this.tripData.reservationPersons) {
-          this.tripData.reservationPersons.forEach(reservation => {
-            if (reservation.person && reservation.person.weight) {
-              totalWeight += parseFloat(reservation.person.weight);
-            }
-          });
-        }
+        totalWeight+=this.totalClientWeight;
 
         return totalWeight;
       },
+      totalClientWeight() {
+        let totalWeight = 0;
+          if (this.tripData.groups && this.tripData.groups.length > 0) {
+            this.tripData.groups.forEach(group => {
+              if (group.clients && group.clients.length > 0) {
+                group.clients.forEach(client => {
+                  if (client.person && client.person.weight) {
+                    totalWeight += parseFloat(client.person.weight);
+                  }
+                });
+              }
+            });
+          }
+          return totalWeight;
+        },
       totalFuelPercentage() {
           const totalWeight = this.totalPassengerWeight + this.totalGearWeight;
           var helicopter = this.tripData.helicopter;

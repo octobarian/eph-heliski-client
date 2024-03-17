@@ -75,9 +75,11 @@ export default {
         this.fetchUnassignedReservations();
     },
     fetchUnassignedReservations() {
+      console.log("Finding Reservations for "+this.selectedDate);
       ReservationDataService.findByDate(this.selectedDate)
         .then(response => {
           this.unassignedReservations = response.data;
+          console.log(this.unassignedReservations);
         })
         .catch(error => {
           console.error("Error fetching unassigned reservations:", error);
@@ -91,7 +93,7 @@ export default {
     },
 
     handleReservationAssignment(data) {
-      TripDataService.assignReservationToTrip(data)
+      TripDataService.assignReservationToTripGroup(data)
         .then(() => {
           // Call a method to update the local data
           this.updateLocalDataAfterAssignment(data);

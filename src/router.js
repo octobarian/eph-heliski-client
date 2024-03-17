@@ -28,6 +28,11 @@ const router = new Router({
       name: "beaconlist",
       component: () => import("@/components/Equipment/BeaconList.vue")
     },
+    {
+      path: "/helicopterlist",
+      name: "helicopterlist",
+      component: () => import("@/components/Equipment/HelicopterList.vue")
+    },
     //Reservation Routes
     {
       path: "/reservationlist",

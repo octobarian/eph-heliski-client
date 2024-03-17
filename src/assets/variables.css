@@ -2,4 +2,9 @@
     --primary-eph-color: #c8d701;
     --primary-text-eph-color: #6e9600;
     --dark-eph-color:#222;
+    /* EVENT COLORS */
+    --private-event-color: #f7bf2f;
+    --minor-media-event-color: #5fb864;
+    --lodge-event-color: #ed6240;
+    --day-event-color: #6d7b9c;
   }

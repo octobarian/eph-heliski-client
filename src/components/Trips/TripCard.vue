@@ -55,7 +55,7 @@
           @removeClient="(client) => handleRemoveClient(client)"
         ></trip-group>
       </div>
-      <TripWeight :tripData="tripData" @gearWeightUpdated="handleGearWeightUpdate" />
+      <!-- <TripWeight :tripData="tripData" @gearWeightUpdated="handleGearWeightUpdate" /> -->
       <label>Notes:</label>
       <div class="notes-container">
         <textarea v-model="noteContent"></textarea>
@@ -67,7 +67,7 @@
 
 <script>
 //components
-import TripWeight from './TripWeight.vue';
+// import TripWeight from './TripWeight.vue';
 import TripGroup from './TripGroup.vue';
 
 //services
@@ -104,7 +104,7 @@ export default {
   },
   components: {
     // Register the new component
-    TripWeight,
+    // TripWeight,
     TripGroup
   },
   data() {
@@ -163,6 +163,7 @@ export default {
               console.log('New group created successfully:', response.data);
               // Add the new group to the tripData.groups array to update the UI
               this.tripData.groups.push(response.data);
+              this.$emit('clientRemoved');
           })
           .catch(error => {
               console.error('Error creating new group:', error);
@@ -170,18 +171,27 @@ export default {
           });
     },
     handleDeleteGroup(groupId) {
-      // Make sure you have a service to handle API requests
-      TripDataService.deleteGroup(groupId)
-        .then(() => {
-          console.log('Group deleted successfully');
-          // Remove the deleted group from the tripData.groups array
-          this.tripData.groups = this.tripData.groups.filter(group => group.groupid !== groupId);
-          // Optionally, you might want to emit an event to notify the parent component
-        })
-        .catch(error => {
-          console.error('Error deleting group:', error);
-          // Optionally, handle the error, e.g., by showing an error message to the user
-        });
+      // Display confirmation dialog before deletion
+      const confirmation = window.confirm("Deleting the group will unassign all clients in the group, are you sure you want to delete this group?");
+
+      if (confirmation) {
+        // Make sure you have a service to handle API requests
+        TripDataService.deleteGroup(groupId)
+          .then(() => {
+            console.log('Group deleted successfully');
+            // Remove the deleted group from the tripData.groups array
+            this.tripData.groups = this.tripData.groups.filter(group => group.groupid !== groupId);
+            this.$emit('clientRemoved');
+            // Optionally, you might want to emit an event to notify the parent component
+          })
+          .catch(error => {
+            console.error('Error deleting group:', error);
+            // Optionally, handle the error, e.g., by showing an error message to the user
+          });
+      } else {
+        // The user clicked "No" or closed the confirmation dialog
+        console.log('Group deletion cancelled.');
+      }
     },
     handleRemoveGuide(guide) {
       // Implement the logic to remove the guide from the group
@@ -278,22 +288,15 @@ export default {
       // You can use this method to update the trip data or perform other actions
     },
     updateTrip() {
-      //TODO: Update to reflect new changes to how this data is updated (tripclient, trip_groups)
-      // Generate guideIds, which can be an empty array if no guides are selected
-      const guideIds = this.tripData.guides.map(guide => {
-        const staffEntry = this.allGuides.find(g => g.person.personid === guide.personid);
-        return staffEntry ? staffEntry.staffid : null;
-      }).filter(id => id !== null); // Filter out any nulls
-
       const updatedTripData = {
         pilotid: this.editableTripData.pilotId,
         helicopterid: this.editableTripData.helicopterId,
-        guideIds: guideIds, // This can be an empty array if no guides are selected
       };
 
-      TripDataService.update(this.tripData.tripid, updatedTripData)
+      TripDataService.update(this.tripData.tripId, updatedTripData)
         .then(response => {
           this.tripData.helicopterId = this.editableTripData.helicopterId;
+          this.tripData.pilotId = this.editableTripData.pilotId;
           console.log(response);
         })
         .catch(error => {

@@ -45,7 +45,7 @@
             <div class="client-grid">
                 <div v-for="(client, index) in clients" :key="client.reservationid" class="client-card">
                     <span class="age-emoji" :style="getAgeStyle(client.person.age)">{{ getAgeEmoji(client.person.age) }}</span>
-                    {{ client.person.firstname }} {{ client.person.lastname }}
+                    {{ client.person.firstname }} {{ client.person.lastname }} 
                     <button class="remove-client-btn" @click="emitRemoveClient(client, index)">x</button>
                 </div>
             </div>

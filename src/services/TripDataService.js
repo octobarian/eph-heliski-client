@@ -58,13 +58,17 @@ class TripDataService {
     return http.get(`/trips/date/${date}`);
   }
 
+  fetchGroupsForTrip(tripId) {
+    return http.get(`/trips/findgroups/${tripId}`);
+  }
+  
   //fetch the trip that belongs to a staff via the date selected
   findByGuideAndDate(staffId, date) {
     return http.get(`/trips/findByGuideAndDate/${staffId}/${date}`);
   }
 
   //assign a reservationid to a trip in the tripclient db
-  assignReservationToTrip(data) {
+  assignReservationToTripGroup(data) {
     return http.post('/trips/assign', data); // Adjust the URL as needed
   }
 

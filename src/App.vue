@@ -55,7 +55,7 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="equipmentDropdown">
                 <router-link to="/beaconlist" class="dropdown-item">Beacons</router-link>
-                <router-link to="/helicopters" class="dropdown-item">Helicopters</router-link>
+                <router-link to="/helicopterlist" class="dropdown-item">Helicopters</router-link>
               </ul>
             </li>
             <!-- Reports Dropdown -->

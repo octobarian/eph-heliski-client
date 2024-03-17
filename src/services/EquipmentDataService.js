@@ -34,7 +34,23 @@ class EquipmentDataService {
         return http.put(`/equipment/beacon/assign/${beaconId}`, { tripClientId });
     }
     
-    // Additional methods for other equipment types can be added here as needed
+    // Helicopters
+    createHelicopter(data) {
+        return http.post("/equipment/helicopter", data);
+    }
+
+    getHelicopters() {
+        return http.get("/equipment/helicopter");
+    }
+
+    deleteHelicopter(id) {
+        return http.delete(`/equipment/helicopter/${id}`);
+    }
+
+    editHelicopter(id, data) {
+        return http.put(`/equipment/helicopter/${id}`, data);
+    }
+
 }
 
 export default new EquipmentDataService();
