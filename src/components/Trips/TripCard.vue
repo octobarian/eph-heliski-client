@@ -236,7 +236,7 @@ export default {
       }
     },
     fetchNote() {
-      NotesDataService.getTripNote(this.tripData.tripid)
+      NotesDataService.getTripNote(this.tripData.tripId)
         .then(response => {
           this.noteContent = response.data.text;
           this.noteId = response.data.noteid;
@@ -256,7 +256,7 @@ export default {
         text: this.noteContent,
         personid: this.loggedInPersonId,
         type: 'tripnote',
-        itemid: this.tripData.tripid
+        itemid: this.tripData.tripId
       };
 
       if (this.noteId) {

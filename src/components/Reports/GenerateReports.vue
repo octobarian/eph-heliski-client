@@ -1,69 +1,124 @@
 <template>
-    <div class="reports-page">
-      <h1 class="reports-title">Reports</h1>
-  
-      <div class="report-generation-box">
-        <div class="form-group">
-          <label for="reportType">Report Type</label>
-          <select id="reportType" class="form-control" v-model="selectedReportType">
-            <option disabled value="">Select a report</option>
-            <option v-for="type in reportTypes" :key="type" :value="type">{{ type }}</option>
-          </select>
-        </div>
-        <div class="form-group">
-            <label for="btn-generate-report">.</label>
-            <button class="btn-generate-report" @click="generateReport"> Generate/Download Report </button>
-        </div>
+  <div class="reports-page">
+    <h1 class="reports-title">Reports</h1>
+
+    <div class="report-generation-box">
+      <div class="form-group">
+        <label for="reportType">Report Type</label>
+        <select id="reportType" class="form-control" v-model="selectedReportType">
+          <option disabled value="">Select a report</option>
+          <option v-for="type in reportTypes" :key="type" :value="type">{{ type }}</option>
+        </select>
       </div>
-  
-      <div class="previous-reports">
-        <h2>Previous Reports:</h2>
-        <table class="table">
-          <thead>
-            <tr>
-              <th>Report Name</th>
-              <th>Date</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="report in previousReports" :key="report.id">
-              <td>{{ report.name }}</td>
-              <td>{{ report.date }}</td>
-              <td>
-                <button class="btn-download">Download</button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+      <div class="form-group">
+        <label for="btn-generate-report">.</label>
+        <button class="btn-generate-report" @click="generateReport">Generate/Download Report</button>
       </div>
     </div>
-  </template>
-  
-  <script>
-  export default {
-    data() {
-      return {
-        selectedReportType: '',
-        reportTypes: [
-          'Lodge Report',
-          // Add other report types here
-        ],
-        previousReports: [
-          // Placeholder for previous report data
-          { id: 1, name: 'Sample Report', date: '2023-10-13' },
-          // Add more reports here
-        ],
-      };
+  </div>
+</template>
+
+<script>
+import jsPDF from 'jspdf';
+import TripDataService from "@/services/TripDataService"; // Adjust the path as needed
+
+export default {
+  data() {
+    return {
+      selectedReportType: '',
+      reportTypes: [
+        'Today\'s Trips Overview',
+        // Add other report types here
+      ],
+    };
+  },
+  methods: {
+    generateReport() {
+      if (this.selectedReportType === "Today's Trips Overview") {
+        this.generateTodaysTripsOverview();
+      }
+      // Add cases for other reports
     },
-    methods: {
-      generateReport() {
-        // Placeholder for generate report method
-        console.log('Report generation not yet implemented.');
-      },
+
+    generateTodaysTripsOverview() {
+      const date = new Date().toISOString().slice(0, 10); // Format today's date as YYYY-MM-DD
+      TripDataService.fetchTripsByDate(date) // Adjust this method name as per your service
+        .then(response => {
+          const tripsData = response.data;
+          this.createPDFReport(tripsData); // Call function to generate and download the report
+        })
+        .catch(error => {
+          console.error("Error fetching trips for report:", error);
+        });
     },
-  };
-  </script>
+
+    createPDFReport(tripsData) {
+      const doc = new jsPDF();
+      let startY = 20; // Vertical position to start drawing from
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const boxWidth = pageWidth / 2 - 15; // Calculate box width to fit 2 per page
+
+      doc.setFontSize(16);
+      doc.text(`Trips Overview for ${new Date().toLocaleDateString()}`, 10, 10);
+
+      tripsData.forEach((trip, index) => {
+        let x = 10 + (index % 2) * (boxWidth + 10); // Position X; alternate position for every trip
+        let y = startY + Math.floor(index / 2) * 60; // Position Y; new row every 2 trips
+        let groupStartY = y + 10; // Start Y position for groups
+
+        // Draw Trip box
+        doc.setDrawColor(0);
+        doc.rect(x, y, boxWidth, 50); // Adjust the height as needed
+
+        // Trip ID in primary color
+        doc.setTextColor("#007bff"); // Primary color
+        doc.setFont("helvetica", "bold");
+        doc.setFontSize(12);
+        doc.text(`Trip ID: ${trip.tripId}`, x + 3, y + 5);
+        doc.setTextColor(0, 0, 0); // Reset text color
+        doc.setFont("helvetica", "normal");
+
+        // Helicopter and Pilot info
+        doc.setFontSize(10);
+        doc.text(`Helicopter: ${trip.helicopter ? trip.helicopter.callsign : 'N/A'}`, x + 3, y + 10);
+        doc.text(`Pilot: ${trip.pilot ? trip.pilot.firstname + ' ' + trip.pilot.lastname : 'N/A'}`, x + 3, y + 15);
+
+        trip.groups.forEach(group => {
+          // Draw Group box within Trip box
+          doc.setDrawColor(0);
+          doc.rect(x + 2, groupStartY, boxWidth - 4, 15); // Adjust the height based on content
+
+          // Group ID and Guide
+          doc.setFontSize(10);
+          doc.text(`Group ID: ${group.groupid}, Guide: ${group.guide ? group.guide.firstname + ' ' + group.guide.lastname : 'N/A'}`, x + 5, groupStartY + 5);
+
+          // Clients within Group
+          let clientStartY = groupStartY + 7;
+          group.clients.forEach(client => {
+            // Client Name in bold
+            doc.setFont("helvetica", "bold");
+            const clientInfo = client.person ? `${client.person.firstname} ${client.person.lastname}, Weight: ${client.person.weight}` : 'Client info unavailable';
+            doc.text(clientInfo, x + 5, clientStartY);
+            clientStartY += 5; // Increment Y position for next client
+          });
+
+          doc.setFont("helvetica", "normal"); // Reset font style
+          groupStartY += 20; // Increment Y position for next group
+        });
+
+        // Check for page end and add a new page if needed
+        if (y > doc.internal.pageSize.getHeight() - 20) {
+          doc.addPage();
+          startY = 20; // Reset Y position for new page
+        }
+      });
+
+      // Trigger download of the PDF
+      doc.save('todays-trips-overview.pdf');
+    },
+  },
+};
+</script>
   
   
   <style scoped>

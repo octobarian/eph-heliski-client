@@ -27,6 +27,10 @@ class ZauiDataService {
     getStatuses(interval) {
       return http.get(`/zaui/zaui-statuses-${interval}`);
     }
+
+    getGuestProfile = (booking) => {
+      return http.post(`/zaui/get-guest-profile-by-booking`, booking);
+    };
 }
 
 export default new ZauiDataService();

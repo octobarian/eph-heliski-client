@@ -3,6 +3,7 @@
         <button style="margin-right: 20px;" @click="getZauiPing">Ping Zaui</button>
         <button @click="getBookingByDay">Get All Bookings Object</button>
         <button @click="getTodaysManifest">Get Today's Manifest</button>
+        <button @click="getGuestProfile">Test Get Guest Profile</button>
         <div id="zaui_data_box">
             {{zaui_object_data}}
         </div>
@@ -62,8 +63,29 @@ export default {
          mapManifestData(manifestData) {
             // Mapping logic will be implemented here in the next steps
             return manifestData;
-        }
-        //method for updating and displaying the data on the zaui_data_box
+        },
+        
+        getGuestProfile() {
+        // Create a placeholder booking object
+            const booking = {
+            bookingNumber: "16322",
+            guestFirstName: "Colin",
+            guestLastName: "Wiseman",
+            mobile: "4165602257",
+            email: "wisecolin21@gmail.com"
+        };
+
+        // Call the service and pass the booking object
+        ZauiDataService.getGuestProfile(booking)
+            .then(response => {
+            console.log(response);
+            // Handle the response data
+            })
+            .catch(error => {
+            console.error("Error getting guest profile:", error);
+            // Handle the error
+            });
+        },
     }
 }
 </script>

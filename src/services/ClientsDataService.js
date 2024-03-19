@@ -2,10 +2,10 @@
 import http from "../http-common";
 
 class ClientsDataService {
-  getAll() {
-    return http.get("/clients");
+  getAll(params = {}) {
+    return http.get("/clients", { params });
   }
-
+  
   get(id) {
     return http.get(`/clients/id/${id}`);
   }

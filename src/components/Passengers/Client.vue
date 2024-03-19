@@ -29,12 +29,24 @@
               <!-- Add other health record details here -->
           </div>
         </div>
+
         <div v-else>
           <p>Loading person details...</p>
         </div>
       </section>
 
-    
+      <section class="profile-section">
+      <h3>Custom Fields</h3>
+      <div v-if="person && filteredCustomFields.length > 0">
+        <div v-for="customField in filteredCustomFields" :key="customField.field_name" class="custom-field">
+          <p><strong>{{ customField.field_name }}:</strong> {{ customField.field_value }}</p>
+        </div>
+      </div>
+      <div v-else>
+        <p>No custom fields available.</p>
+      </div>
+    </section>
+
         <section>
           <h3>Trip History</h3>
           <!-- Future implementation for trip history -->
@@ -45,6 +57,8 @@
           <!-- Display and edit training details -->
         </section>
     </section>
+
+    <!-- EDITING SECTION -->
     <section v-if="editing" class="edit-section">
     <h3>Edit Client Details</h3>
     <form @submit.prevent="updateClient">
@@ -129,6 +143,7 @@
             console.log(response);
             this.client = response.data;
             this.person = response.data.person;
+            this.customFields = response.data.person.customFields;
             // Additional fetch calls to get health records and training details
             this.healthRecords = response.data.person.personhealth;
             })
@@ -159,6 +174,15 @@
     created() {
       //Get the client by the ID
       this.fetchClientData();
+    },
+    computed: {
+      filteredCustomFields() {
+        return this.customFields.filter(field => {
+          // Check if field_value is not empty, not an empty object, and not an empty array
+          const value = field.field_value;
+          return value && value !== '{}' && (!Array.isArray(value) || value.length > 0);
+        });
+      }
     }
   };
   </script>
