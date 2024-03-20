@@ -36,33 +36,46 @@
                     </option>
                 </select>
             </div>
+        <!-- In TripGroup.vue -->
         <div class="continue-section">
             <label>Continue till: </label>
-            <input type="date" style="margin-left: 10px;" class="continue-till-date">
+            <input type="date" v-model="groupEndDate" @change="emitDateChange" style="margin-left: 10px;" class="continue-till-date">
         </div>
         <div class="clients-section">
             <label class="group-members-label">Group Members:</label>
-            <div class="client-grid">
-                <div v-for="(client, index) in clients" :key="client.reservationid" class="client-card">
-                    <span class="age-emoji" :style="getAgeStyle(client.person.age)">{{ getAgeEmoji(client.person.age) }}</span>
-                    {{ client.person.firstname }} {{ client.person.lastname }} 
-                    <button class="remove-client-btn" @click="emitRemoveClient(client, index)">x</button>
+                <div class="client-grid">
+                    <div v-for="(client, index) in localClients" :key="client.reservationid" class="client-card">
+                        <div class="row client-information-sections">
+                            <span class="age-emoji" :style="getAgeStyle(client.person.age)">{{ getAgeEmoji(client.person.age) }}</span>
+                            {{ client.person.firstname }} {{ client.person.lastname }} 
+                            <button class="remove-client-btn" @click="emitRemoveClient(client, index)">x</button>
+                        </div>
+                        <div class="row beacon-selection-section">
+                            <select v-model="client.selectedBeaconId" @change="onBeaconSelect(index)">
+                                <option disabled value="">Select a Beacon</option>
+                                <option v-for="beacon in allBeacons" :key="beacon.beaconid" :value="beacon.beaconid">
+                                    {{ beacon.beaconnumber }}
+                                </option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            </div>
         </div>
     </div>
-  </template>
+</div>
+</template>
   
   
   <script>
+  import EquipmentDataService from '@/services/EquipmentDataService';
   export default {
     props: {
       groupId: Number,
       guide: {
-        type: Object,
-        required: true,
-      },
+        type: [Object, null], // This line is changed to allow both Object and Null
+        default: () => null, // Provide a default value as a function that returns null
+        required: false // Make this prop optional since it can be null
+        },
       clients: {
         type: Array,
         required: true,
@@ -70,7 +83,9 @@
       allGuides: {
         type: Array,
         required: true,
-      }
+      },
+      allBeacons: Array,
+      groupEndDate: String,
     },
     methods: {
         getAgeEmoji(age) {
@@ -118,17 +133,52 @@
         emitRemoveClient(client) {
             console.log(client); // This should now correctly log the client object
             this.$emit('removeClient', { tripClientId: client.tripClientId, groupId: this.groupId });
-        }
+        },
+        emitDateChange() {
+            this.$emit('updateEndDate', { groupId: this.groupId, newEndDate: this.continueTillDate });
+        },
+        assignBeacon(beaconId, tripClientId) {
+            EquipmentDataService.assignBeaconToTripClient(beaconId, tripClientId)
+                .then(() => {
+                    console.log(`Beacon ${beaconId} assigned to TripClient ${tripClientId} successfully.`);
+                    // Handle successful assignment (e.g., show a notification)
+                })
+                .catch(error => {
+                    console.error("Error assigning beacon to trip client:", error);
+                    // Handle error (e.g., show an error notification)
+                });
+        },
+        
+        onBeaconSelect(clientIndex) {
+            const client = this.localClients[clientIndex];
+            if(client.selectedBeaconId && client.tripClientId) {
+                this.assignBeacon(client.selectedBeaconId, client.tripClientId);
+            }
+        },
 
-
+        initializeClients() {
+            // Make a deep copy of the clients prop to localClients
+            this.localClients = this.clients.map(client => ({
+                ...client,
+                selectedBeaconId: client.beacon ? client.beacon.beaconid : null,
+            }));
+        },
     },
     data() {
         return {
             isCollapsed: true,
+            localClients: [],
+            continueTillDate: '',
         };
     },
     watch: {
-
+        clients: {
+            handler() {
+                this.initializeClients();
+            },
+            deep: true,
+            immediate: true, // To handle initialization on prop change as well
+        }
     },
     computed: {
         clientCount() {
@@ -136,7 +186,11 @@
         },
         totalWeight() {
             // Calculate total weight by summing up the weight of each client
-            return this.clients.reduce((total, client) => total + parseInt(client.person.weight), 0);
+            // If the weight is null, treat it as 0
+            return this.clients.reduce((total, client) => {
+                const weight = parseInt(client.person.weight);
+                return total + (isNaN(weight) ? 0 : weight);
+            }, 0);
         },
         selectedGuideId: {
             get() {
@@ -156,7 +210,10 @@
                         }
                     }
                 }
-        }
+        },
+    },
+    created() {
+        this.initializeClients();
     },
   };
   </script>
@@ -288,8 +345,18 @@
         border-radius: 8px;
         padding: 10px;
         display: flex;
-        justify-content: space-between;
-        align-items: center;
+        flex-direction: column; /* Stack the sections vertically */
+        gap: 10px; /* Add some space between the rows */
+    }
+
+    .client-information-section, .beacon-selection-section {
+        display: flex;
+        align-items: center; /* Center items vertically within each row */
+        gap: 10px; /* Space between elements within the row */
+    }
+
+    .beacon-selection-section select {
+        flex-grow: 1; /* Allow the select element to take up available space */
     }
 
     .client-tag:hover {
@@ -297,7 +364,8 @@
     }
 
     .remove-client-btn {
-        margin-left: 8px;
+        margin-left: auto;
+        width: 25px;
         background-color: #dc3545;
         border: none;
         border-radius: 50%;

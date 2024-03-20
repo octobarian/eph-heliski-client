@@ -17,7 +17,7 @@ export default {
   },
   methods: {
     update: function() {
-      fetch(`http://localhost:8080/set-user-data`, {
+      fetch(`http://${process.env.OAUTHSERVERIP}:${process.env.OAUTHSERVERPORT}set-user-data`, {
         credentials: "include",
         method: "POST",
         headers: {

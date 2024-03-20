@@ -18,6 +18,7 @@
             :allPilots="pilots"
             :allGuides="guides"
             :allHelicopters="helicopters"
+            :allBeacons="beacons"
             @tripDeleted="handleTripDeleted"
             @removeReservationFromTrip="handleRemoveReservationFromTrip"
             @clientRemoved="handleClientRemoved"
@@ -45,6 +46,7 @@ import TripCard from './Trips/TripCard.vue';
 import UnassignedReservations from './Reservations/UnassignedReservations.vue';
 import TripDataService from '@/services/TripDataService';
 import ReservationDataService from '@/services/ReservationDataService'; 
+import EquipmentDataService from '@/services/EquipmentDataService';
 
 export default {
   components: {
@@ -58,7 +60,8 @@ export default {
       pilots: [],
       guides: [],
       helicopters: [],
-      unassignedReservations: []
+      unassignedReservations: [],
+      beacons: [],
     };
   },
   methods: {
@@ -75,11 +78,11 @@ export default {
         this.fetchUnassignedReservations();
     },
     fetchUnassignedReservations() {
-      console.log("Finding Reservations for "+this.selectedDate);
+      // console.log("Finding Reservations for "+this.selectedDate);
       ReservationDataService.findByDate(this.selectedDate)
         .then(response => {
           this.unassignedReservations = response.data;
-          console.log(this.unassignedReservations);
+          // console.log(this.unassignedReservations);
         })
         .catch(error => {
           console.error("Error fetching unassigned reservations:", error);
@@ -173,6 +176,15 @@ export default {
           console.error("Error fetching helicopters:", error);
         });
     },
+    fetchBeacons() {
+      EquipmentDataService.getAllBeacons() 
+        .then(response => {
+          this.beacons = response.data;
+        })
+        .catch(error => {
+          console.error("Error fetching beacons:", error);
+        });
+    },
   },
   created() {
     this.fetchTripsByDate();
@@ -180,6 +192,7 @@ export default {
     this.fetchGuides();
     this.fetchHelicopters();
     this.fetchTripsByDate();
+    this.fetchBeacons();
   }
 };
 </script>

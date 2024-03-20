@@ -1,16 +1,16 @@
 import axios from "axios";
 
+// Use environment variable for the base URL
 const http = axios.create({
-  //TODO: Adjust this to work on .env
-  baseURL: "http://localhost:8080",
+  baseURL: process.env.VUE_APP_ZAUI_API_BASE_URL,
   headers: {
     "Content-type": "application/json"
   }
 });
 
 class ZauiDataService {
+    // Service methods remain the same
     ping() {
-      //pings the status of Zaui api, will return "pong" when its okay
         return http.post("/zaui/zaui-ping");
     }
     getBookingByDay(date){

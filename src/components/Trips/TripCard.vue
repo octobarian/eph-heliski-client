@@ -46,10 +46,13 @@
           v-for="(group) in tripData.groups"
           :key="group.groupid"
           :group-id="group.groupid"
+          :groupEndDate = "group.end_date"
           :guide="group.guide"
           :clients="group.clients"
           :all-guides="allGuides"
+          :all-beacons="allBeacons"
           @update:guide="(selectedGuideId, groupId) => handleUpdateGuide(selectedGuideId, groupId)"
+          @updateEndDate="(data) => updateGroupDate(data)"
           @deleteGroup="() => handleDeleteGroup(group.groupid)"
           @removeGuide="guide => handleRemoveGuide(guide)"
           @removeClient="(client) => handleRemoveClient(client)"
@@ -97,6 +100,7 @@ export default {
       type: Array,
       required: true,
     },
+    allBeacons: Array,
   },
   mounted() {
     this.fetchNote();
@@ -238,13 +242,30 @@ export default {
     fetchNote() {
       NotesDataService.getTripNote(this.tripData.tripId)
         .then(response => {
-          this.noteContent = response.data.text;
-          this.noteId = response.data.noteid;
+          // Check if the response data exists and is not null before setting noteContent and noteId
+          if (response.data && response.data.text !== null) {
+            this.noteContent = response.data.text;
+            this.noteId = response.data.noteid;
+          } else {
+            // If there's no note, or the note text is null, set default values
+            this.noteContent = '';
+            this.noteId = null;
+          }
         })
         .catch(error => {
           console.error('Error fetching note:', error);
+          // Check for a 404 error and handle it specifically
+          if (error.response && error.response.status === 404) {
+            // If the error is a 404, it means no note exists for this trip.
+            // Set noteContent to an empty string so that Vue does not error out.
+            this.noteContent = '';
+            this.noteId = null; // Also ensure noteId is null or appropriately set for a non-existent note.
+          } else {
+            // Handle other types of errors as appropriate
+          }
         });
     },
+
     saveNote() {
       if (!this.loggedInPersonId) {
         console.error('No logged in person ID found');
@@ -302,6 +323,25 @@ export default {
         .catch(error => {
           console.error("Error updating trip:", error);
         });
+    },
+    updateGroupDate({ groupId, newEndDate }) {
+        // Now including tripId in the data sent to the server
+        const tripId = this.tripData.tripId;
+        console.log('Update' +tripId+' gid'+groupId+' NED'+newEndDate);
+        // Adjusting the call to include tripId as part of the object sent
+        TripDataService.updateGroupDate({ groupId, tripId, newEndDate })
+            .then(response => {
+                // Handle success - you may want to refresh the group data or emit an event
+                console.log("Group end date updated successfully:", response);
+                // Consider emitting an event or directly updating the local data to reflect the change
+                this.$emit('groupDateUpdated', { groupId, newEndDate });
+                // Optionally, trigger a refresh of the trip data if the component structure allows for it
+                // this.fetchTripData(tripId); // Assuming such a method exists
+            })
+            .catch(error => {
+                // Handle error
+                console.error("Error updating group end date:", error);
+            });
     },
     removeGuide(guideToRemove) {
       this.tripData.guides = this.tripData.guides.filter(guide => guide.personid !== guideToRemove.personid);

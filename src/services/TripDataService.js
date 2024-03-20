@@ -37,6 +37,10 @@ class TripDataService {
   updateGroupGuide(groupId, guideId) {
     return http.put(`/trips/group/${groupId}/guide`, { guideId });
   }
+
+  updateGroupDate({ groupId, tripId, newEndDate }) {
+    return http.put(`/trips/groupDate/${tripId}/${groupId}`, { end_date: newEndDate });
+  }  
   
   // Method to fetch guides
   fetchGuides() {

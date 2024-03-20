@@ -46,3 +46,4 @@ Thumbs.db
 #Large Folders
 /fusionauth/java/
 node_modules
+.env.development
