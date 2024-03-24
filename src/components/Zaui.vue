@@ -4,9 +4,8 @@
         <button @click="getBookingByDay">Get All Bookings Object</button>
         <button @click="getTodaysManifest">Get Today's Manifest</button>
         <button @click="getGuestProfile">Test Get Guest Profile</button>
-        <div id="zaui_data_box">
-            {{zaui_object_data}}
-        </div>
+        <button @click="testZauiMapping">Test Zaui Mapping</button>
+        <div id="zaui_data_box" v-html="zaui_object_data"></div>
         
     </div>
 </template>
@@ -28,6 +27,44 @@ export default {
             ZauiDataService.ping()
                 .then(response => {
                     this.zaui_object_data = response.data;
+                    console.log(response.data);
+                })
+                .catch(e => {
+                    console.log(e);
+                });
+        },
+
+        testZauiMapping() {
+            var today = new Date();
+            ZauiDataService.checkZauiMapping(today)
+                .then(response => {
+                    // Format the array of strings into an HTML string
+                    let formattedData = "<ul style='list-style-type: none; padding: 0;'>";
+                    response.data.forEach(item => {
+                        // Correctly extract booking number and reservation ID from the response string
+                        const parts = item.split(" ");
+                        const bookingNumber = parts[3]; // Assuming 'bookingNumber' is the fourth word in the string
+                        const reservationId = parts[parts.length - 1]; // Assuming 'id' is the last word in the string
+                        
+                        // Determine if the reservation was found or not
+                        const isReservationFound = !item.includes("No matching reservation found");
+
+                        // Set the background color based on whether the reservation was found
+                        const backgroundColor = isReservationFound ? "lightgreen" : "lightcoral"; // lightcoral for better readability with black text
+                        const textColor = isReservationFound ? "black" : "black"; // Ensuring text color is set for readability
+                        
+                        // Format the message based on whether a reservation ID is present
+                        const message = isReservationFound 
+                                        ? `Booking Number: <strong>${bookingNumber}</strong> - Reservation ID: <strong>${reservationId}</strong>` 
+                                        : `Booking Number: <strong>${bookingNumber}</strong> - No matching reservation found`;
+
+                        // Add to the HTML string with styled backgrounds
+                        formattedData += `<li style="background-color: ${backgroundColor}; color: ${textColor}; padding: 5px; margin-bottom: 2px;">${message}</li>`;
+                    });
+                    formattedData += "</ul>";
+
+                    // Set the formatted HTML as zaui_object_data to render it in the template
+                    this.zaui_object_data = formattedData;
                     console.log(response.data);
                 })
                 .catch(e => {
@@ -78,7 +115,7 @@ export default {
         // Call the service and pass the booking object
         ZauiDataService.getGuestProfile(booking)
             .then(response => {
-            console.log(response);
+                this.zaui_object_data = response;
             // Handle the response data
             })
             .catch(error => {

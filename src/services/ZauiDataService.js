@@ -24,6 +24,11 @@ class ZauiDataService {
       return http.get(`/zaui/get-date-manifest?date=${testDate}`);
     }
 
+    checkZauiMapping(date){
+      var testDate = date.toISOString().slice(0, 10);
+      return http.post(`/zaui/check-zaui-mapping?date=${testDate}`);
+    }
+
     getStatuses(interval) {
       return http.get(`/zaui/zaui-statuses-${interval}`);
     }
