@@ -166,7 +166,7 @@ export default {
           .then(response => {
               console.log('New group created successfully:', response.data);
               // Add the new group to the tripData.groups array to update the UI
-              this.tripData.groups.push(response.data);
+              this.tripData.groups = [...this.tripData.groups, response.data];
               this.$emit('clientRemoved');
           })
           .catch(error => {

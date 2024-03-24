@@ -3,6 +3,11 @@
     <h1 class="reports-title">Reports</h1>
 
     <div class="report-generation-box">
+      <!-- Date Selector -->
+      <div class="form-group">
+        <label for="reportDate">Report Date</label>
+        <input type="date" id="reportDate" class="form-control" v-model="selectedDate">
+      </div>
       <div class="form-group">
         <label for="reportType">Report Type</label>
         <select id="reportType" class="form-control" v-model="selectedReportType">
@@ -14,107 +19,73 @@
         <label for="btn-generate-report">.</label>
         <button class="btn-generate-report" @click="generateReport">Generate/Download Report</button>
       </div>
+      <div class="form-group">
+        <button class="btn-test-report" @click="testReport">Test Report Data Fetch</button>
+      </div>
     </div>
   </div>
 </template>
 
 <script>
-import jsPDF from 'jspdf';
-import TripDataService from "@/services/TripDataService"; // Adjust the path as needed
+import ReportsDataService from '@/services/ReportsDataService.js';
+//individual reports
+import generateDailyTripsReport from './reportScripts/dailyTripsReport.js'; // Ensure path correctness
+import generateMedicalReport from './reportScripts/medicalReport.js'
 
 export default {
   data() {
     return {
       selectedReportType: '',
+      selectedDate: new Date().toISOString().substr(0, 10), // Set default to today's date
       reportTypes: [
-        'Today\'s Trips Overview',
+        'Trips Overview',
+        'Medical Report',
         // Add other report types here
       ],
     };
   },
   methods: {
     generateReport() {
-      if (this.selectedReportType === "Today's Trips Overview") {
+      if (this.selectedReportType === "Trips Overview") {
         this.generateTodaysTripsOverview();
+      }
+      if (this.selectedReportType === "Medical Report") {
+        this.generateMedicalReport();
       }
       // Add cases for other reports
     },
 
     generateTodaysTripsOverview() {
-      const date = new Date().toISOString().slice(0, 10); // Format today's date as YYYY-MM-DD
-      TripDataService.fetchTripsByDate(date) // Adjust this method name as per your service
+      ReportsDataService.getDailyTripsReportData(this.selectedDate)
         .then(response => {
           const tripsData = response.data;
-          this.createPDFReport(tripsData); // Call function to generate and download the report
+          generateDailyTripsReport(tripsData); // Pass the fetched data to the report generation function
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
         });
     },
 
-    createPDFReport(tripsData) {
-      const doc = new jsPDF();
-      let startY = 20; // Vertical position to start drawing from
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const boxWidth = pageWidth / 2 - 15; // Calculate box width to fit 2 per page
-
-      doc.setFontSize(16);
-      doc.text(`Trips Overview for ${new Date().toLocaleDateString()}`, 10, 10);
-
-      tripsData.forEach((trip, index) => {
-        let x = 10 + (index % 2) * (boxWidth + 10); // Position X; alternate position for every trip
-        let y = startY + Math.floor(index / 2) * 60; // Position Y; new row every 2 trips
-        let groupStartY = y + 10; // Start Y position for groups
-
-        // Draw Trip box
-        doc.setDrawColor(0);
-        doc.rect(x, y, boxWidth, 50); // Adjust the height as needed
-
-        // Trip ID in primary color
-        doc.setTextColor("#007bff"); // Primary color
-        doc.setFont("helvetica", "bold");
-        doc.setFontSize(12);
-        doc.text(`Trip ID: ${trip.tripId}`, x + 3, y + 5);
-        doc.setTextColor(0, 0, 0); // Reset text color
-        doc.setFont("helvetica", "normal");
-
-        // Helicopter and Pilot info
-        doc.setFontSize(10);
-        doc.text(`Helicopter: ${trip.helicopter ? trip.helicopter.callsign : 'N/A'}`, x + 3, y + 10);
-        doc.text(`Pilot: ${trip.pilot ? trip.pilot.firstname + ' ' + trip.pilot.lastname : 'N/A'}`, x + 3, y + 15);
-
-        trip.groups.forEach(group => {
-          // Draw Group box within Trip box
-          doc.setDrawColor(0);
-          doc.rect(x + 2, groupStartY, boxWidth - 4, 15); // Adjust the height based on content
-
-          // Group ID and Guide
-          doc.setFontSize(10);
-          doc.text(`Group ID: ${group.groupid}, Guide: ${group.guide ? group.guide.firstname + ' ' + group.guide.lastname : 'N/A'}`, x + 5, groupStartY + 5);
-
-          // Clients within Group
-          let clientStartY = groupStartY + 7;
-          group.clients.forEach(client => {
-            // Client Name in bold
-            doc.setFont("helvetica", "bold");
-            const clientInfo = client.person ? `${client.person.firstname} ${client.person.lastname}, Weight: ${client.person.weight}` : 'Client info unavailable';
-            doc.text(clientInfo, x + 5, clientStartY);
-            clientStartY += 5; // Increment Y position for next client
-          });
-
-          doc.setFont("helvetica", "normal"); // Reset font style
-          groupStartY += 20; // Increment Y position for next group
+    generateMedicalReport() {
+      ReportsDataService.getMedicalReportData(this.selectedDate)
+        .then(response => {
+          const medicalData = response.data;
+          generateMedicalReport(medicalData); // Pass the fetched data to the report generation function
+        })
+        .catch(error => {
+          console.error("Error fetching trips for report:", error);
         });
+    },
 
-        // Check for page end and add a new page if needed
-        if (y > doc.internal.pageSize.getHeight() - 20) {
-          doc.addPage();
-          startY = 20; // Reset Y position for new page
-        }
-      });
-
-      // Trigger download of the PDF
-      doc.save('todays-trips-overview.pdf');
+    testReport() {
+      console.log("Testing Report");
+      ReportsDataService.getMedicalReportData(this.selectedDate)
+        .then(response => {
+          console.log('Test Report Data:', response.data); // Log the response data to the console
+        })
+        .catch(error => {
+          console.error("Error during test fetch for report:", error);
+        });
     },
   },
 };
@@ -198,6 +169,18 @@ export default {
     background-color: #6c757d;
     border-color: #6c757d;
     cursor: pointer;
+  }
+
+  .btn-test-report {
+    padding: 0.375rem 1rem;
+    font-size: 1rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    color: #fff;
+    background-color: #28a745; /* Bootstrap success color for test button */
+    border: none;
+    cursor: pointer;
+    margin-top: 10px; /* Add some margin at the top of the button */
   }
   </style>
   

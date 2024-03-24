@@ -78,7 +78,7 @@
         },
       clients: {
         type: Array,
-        required: true,
+        default: () => [], // Set default to empty array
       },
       allGuides: {
         type: Array,
@@ -167,31 +167,32 @@
     data() {
         return {
             isCollapsed: true,
-            localClients: [],
-            continueTillDate: '',
+            localClients: this.clients || [], // Initialize with clients or an empty array
+            continueTillDate: this.groupEndDate || '', // Initialize with groupEndDate or an empty string
         };
     },
     watch: {
         clients: {
-            handler() {
-                this.initializeClients();
-            },
-            deep: true,
-            immediate: true, // To handle initialization on prop change as well
+        handler(newValue) {
+            // Handle cases where newValue is null or undefined
+            this.localClients = newValue || [];
+        },
+        deep: true,
+        immediate: true, // Invoke handler immediately with current value of the prop
         }
     },
     computed: {
         clientCount() {
-        return this.clients.length;
+            // Safely handle null or undefined clients array
+            return this.localClients ? this.localClients.length : 0;
         },
         totalWeight() {
-            // Calculate total weight by summing up the weight of each client
-            // If the weight is null, treat it as 0
-            return this.clients.reduce((total, client) => {
-                const weight = parseInt(client.person.weight);
+            // Handle cases where this.clients is null, undefined, or empty
+            return this.localClients.reduce((total, client) => {
+                const weight = parseInt(client.person && client.person.weight);
                 return total + (isNaN(weight) ? 0 : weight);
             }, 0);
-        },
+            },
         selectedGuideId: {
             get() {
                 // Check if guide exists before trying to access its properties
