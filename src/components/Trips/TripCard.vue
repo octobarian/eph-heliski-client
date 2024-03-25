@@ -365,9 +365,9 @@ export default {
       }
     },
     deleteTrip() {
-      TripDataService.delete(this.tripData.tripid)
+      TripDataService.delete(this.tripData.tripId)
         .then(() => {
-          this.$emit('tripDeleted', this.tripData.tripid);
+          this.$emit('tripDeleted', this.tripData.tripId);
         })
         .catch(error => {
           console.error("Error deleting trip:", error);

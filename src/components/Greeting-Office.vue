@@ -141,6 +141,7 @@ export default {
       TripDataService.createTrip(newTrip)
         .then(response => {
           this.trips.push(response.data); // Add the new trip to the list
+          this.fetchTripsByDate();
         })
         .catch(error => {
           console.error("Error creating new trip:", error);
@@ -148,6 +149,7 @@ export default {
     },
     handleTripDeleted(deletedTripId) {
       this.trips = this.trips.filter(trip => trip.tripid !== deletedTripId);
+      this.fetchTripsByDate();
     },
     fetchPilots() {
       TripDataService.fetchPilots()
