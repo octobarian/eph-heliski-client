@@ -163,6 +163,8 @@ export default {
 
       vue_app_oauth_server_ip: process.env.VUE_APP_OAUTHSERVERIP+":"+process.env.VUE_APP_OAUTHSERVERPORT,
       vue_app_oauth_server_ip_logout: process.env.VUE_APP_OAUTHSERVERIP+":"+process.env.VUE_APP_OAUTHSERVERPORT+"/logout",
+      vue_app_server_ip: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT
+
     };
   },
   computed: {
@@ -180,6 +182,7 @@ mounted() {
 
   this.vue_app_oauth_server_ip = process.env.VUE_APP_OAUTHSERVERIP+":"+process.env.VUE_APP_OAUTHSERVERPORT;
   this.vue_app_oauth_server_ip_logout = this.vue_app_oauth_server_ip+"/logout";
+  this.vue_app_server_ip = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT;
 
   fetch(`${this.vue_app_oauth_server_ip}/user`, {
     credentials: "include" // fetch won't send cookies unless you set credentials
@@ -231,7 +234,7 @@ beforeDestroy() {
 methods: {
   // ... other methods ...
     fetchZauiStatus() {
-      fetch(`${this.vue_app_oauth_server_ip}/zaui/zaui-status`, {
+      fetch(`${this.vue_app_server_ip}/zaui/zaui-status`, {
           credentials: 'include', // Include cookies in the request
           headers: {
               'Content-Type': 'application/json'
@@ -247,6 +250,7 @@ methods: {
           this.zauiStatus = data;
       })
       .catch(error => {
+          console.error(this.vue_app_server_ip);
           console.error('Error fetching Zaui status:', error);
       });
     },
