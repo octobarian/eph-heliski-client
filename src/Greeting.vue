@@ -3,13 +3,17 @@
     <div class="login-container">
       <img src="https://eaglepassheli.com/resources/themes/eaglepass/img/logo.svg?m=1690981199">
       <h3 class="login-message">You are not logged in</h3>
-
+      
       <div class="authStateBox">{{ authState }}</div>
        <!-- Added Sign In/Sign Out button here -->
       <h1>
         <a id="signInButton" :href="oauthServerUrl">Sign In</a>
       </h1>
-
+    </div>
+    <div class="login-container">
+      <h3> DEBUGGING TIME:</h3>
+      <p style="color: white;">Login URL: {{ oauthServerUrl }}</p>
+      <p style="color: white;">OAUTH SERVER IP: {{ oauthServerIP }}</p>
     </div>
   </div>
 </template>
@@ -21,6 +25,9 @@ export default {
   computed: {
     oauthServerUrl() {
       return process.env.VUE_APP_OAUTH_LOGIN_SERVER_URL;
+    },
+    oauthServerIP(){
+      return process.env.VUE_APP_OAUTHSERVERIP;
     }
   }
 };
