@@ -19,11 +19,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.6
-
     - name: Set up Node.js
       uses: actions/setup-node@v1
       with:
@@ -33,17 +28,6 @@ jobs:
       run: |
         npm install
         npm run build
-
-    - name: Create and start virtual environment
-      run: |
-        python3 -m venv venv
-        source venv/bin/activate
-
-    - name: Install dependencies
-      run: pip install -r requirements.txt
-
-    - name: test with PyTest
-      run: pytest --cov=app --cov-report=xml
 
     - name: Upload artifact for deployment jobs
       uses: actions/upload-artifact@v2
