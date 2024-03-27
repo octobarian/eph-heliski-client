@@ -16,15 +16,14 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: '16' # Adjusted to a compatible version
-
-      - name: Configure Node.js Environment
-        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
+          node-version: '20' # Adjusted to a compatible version
 
       - name: npm install, build, and test
         run: |
           npm install
           npm run build --if-present
+        env:
+          NODE_OPTIONS: --openssl-legacy-provider
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v2
