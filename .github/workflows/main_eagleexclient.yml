@@ -16,7 +16,10 @@ jobs:
       - name: Set up Node.js version
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '16' # Adjusted to a compatible version
+
+      - name: Configure Node.js Environment
+        run: echo "NODE_OPTIONS=--openssl-legacy-provider" >> $GITHUB_ENV
 
       - name: npm install, build, and test
         run: |
