@@ -7,13 +7,12 @@
       <div class="authStateBox">{{ authState }}</div>
        <!-- Added Sign In/Sign Out button here -->
       <h1>
-        <a id="signInButton" :href="oauthServerUrl">Sign In</a>
+        <a id="signInButton" :href="loginAddress">Sign In</a>
       </h1>
     </div>
     <div class="login-container">
       <h3> DEBUGGING TIME:</h3>
-      <p style="color: white;">Login URL: {{ oauthServerUrl }}</p>
-      <p style="color: white;">OAUTH SERVER IP: {{ oauthServerIP }}</p>
+      <p style="color: white;">Login URL: {{ loginAddress }}</p>
     </div>
   </div>
 </template>
@@ -23,11 +22,9 @@ export default {
   name: 'Greet',
   props: ["email", "authState", "boolShowSignOut"],
   computed: {
-    oauthServerUrl() {
-      return process.env.VUE_APP_OAUTH_LOGIN_SERVER_URL;
-    },
-    oauthServerIP(){
-      return process.env.VUE_APP_OAUTHSERVERIP;
+    loginAddress(){
+      var address = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/login";
+      return address;
     }
   }
 };

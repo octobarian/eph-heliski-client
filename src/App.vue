@@ -81,7 +81,7 @@
               </router-link>
             </li>
             <li class="nav-item">
-              <a :href="vue_app_oauth_server_ip_logout" class="nav-link">Sign Out</a>
+              <a :href="logout_address" class="nav-link">Sign Out</a>
             </li>
           </ul>
         </div>
@@ -125,7 +125,7 @@
               </router-link>
             </li>
             <li class="nav-item">
-              <a :href="vue_app_oauth_server_ip_logout" class="nav-link">Sign Out</a>
+              <a :href="logout_address" class="nav-link">Sign Out</a>
             </li>
           </ul>
         </div>
@@ -161,9 +161,8 @@ export default {
       zauiStatus: null,
       zauiStatusCheckInterval: null,
 
-      vue_app_oauth_server_ip: process.env.VUE_APP_OAUTHSERVERIP+":"+process.env.VUE_APP_OAUTHSERVERPORT,
-      vue_app_oauth_server_ip_logout: process.env.VUE_APP_OAUTHSERVERIP+":"+process.env.VUE_APP_OAUTHSERVERPORT+"/logout",
-      vue_app_server_ip: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT
+      vue_app_server_ip: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT,
+      logout_address: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout"
 
     };
   },
@@ -179,12 +178,10 @@ export default {
 mounted() {
 
   this.fetchZauiStatus();
-
-  this.vue_app_oauth_server_ip = process.env.VUE_APP_OAUTHSERVERIP+":"+process.env.VUE_APP_OAUTHSERVERPORT;
-  this.vue_app_oauth_server_ip_logout = this.vue_app_oauth_server_ip+"/logout";
   this.vue_app_server_ip = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT;
+  this.logout_address= process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout"
 
-  fetch(`${this.vue_app_oauth_server_ip}/user`, {
+  fetch(`${this.vue_app_server_ip}/user`, {
     credentials: "include" // fetch won't send cookies unless you set credentials
   })
       .then((response) => response.json())

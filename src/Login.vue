@@ -16,8 +16,8 @@ export default {
   data() {
     return {
       // Access environment variables and store them in data properties
-      loginUrl: process.env.VUE_APP_OAUTH_LOGIN_URL,
-      logoutUrl: process.env.VUE_APP_OAUTH_LOGOUT_URL,
+      loginUrl: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/login",
+      logoutUrl: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout",
     };
   },
 };
