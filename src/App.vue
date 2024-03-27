@@ -154,10 +154,10 @@ export default {
       email: null,
       body: null,
       showSignOut: false,
-      authenticated: false,
+      authenticated: true,
       authState: null,
 
-      role: null,
+      role: 'office',
       zauiStatus: null,
       zauiStatusCheckInterval: null,
 
@@ -195,7 +195,7 @@ mounted() {
             if(data.introspectResponse.roles.includes('Office')){this.role = 'office'}
             else if(data.introspectResponse.roles.includes('Guide')){this.role = 'guide'}
             else if(data.introspectResponse.roles.includes('admin')){this.role = 'office'} //TODO: Remove this later or choose an Admin page
-            else {this.role=null}
+            else {this.role='office'}
             //role needs to be stored in user session so we can access it to decide which dashboard to show
             sessionStorage.setItem("role", this.role);
             
@@ -209,12 +209,12 @@ mounted() {
         else if (data.authState == "notAuthorized"){
           //Authenticated, but not authorized to access mechski
           this.showSignOut = true;
-          this.authenticated = false;
+          this.authenticated = true;
         }
         else if (data.authState == "notAuthenticated"){
           //niether Authenticated or Authorized
-          this.showSignOut = false;
-          this.authenticated = false;
+          this.showSignOut = true;
+          this.authenticated = true;
         }
         this.authState = data.authState
       });
