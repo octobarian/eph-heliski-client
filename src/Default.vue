@@ -20,12 +20,13 @@
     },
     data() {
         return {
-            role: null,
+            role: 'office',
         }
     },
     mounted(){
          //check user session for their current role, use this to decide which dashboard to show
         this.role = sessionStorage.getItem("role");
+        this.role = 'office'
     },
   };
   </script>
