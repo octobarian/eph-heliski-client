@@ -35,13 +35,17 @@ export default {
         },
 
         testZauiMapping() {
-            var today = new Date();
-            ZauiDataService.checkZauiMapping(today)
-                .then(response => {
-                    // Format the array of strings into an HTML string
+        var today = new Date();
+        ZauiDataService.checkZauiMapping(today)
+            .then(response => {
+                // Check if the response contains the 'no manifest found' message
+                if (response.data.length === 1 && response.data[0].startsWith("No")) {
+                    // Display a red background box with the message
+                    this.zaui_object_data = `<div style="background-color: red; color: white; padding: 10px;">${response.data[0]}</div>`;
+                } else {
+                    // Proceed with the existing logic for formatting the data
                     let formattedData = "<ul style='list-style-type: none; padding: 0;'>";
                     response.data.forEach(item => {
-                        // Correctly extract booking number and reservation ID from the response string
                         const parts = item.split(" ");
                         const bookingNumber = parts[3]; // Assuming 'bookingNumber' is the fourth word in the string
                         const reservationId = parts[parts.length - 1]; // Assuming 'id' is the last word in the string
@@ -51,9 +55,9 @@ export default {
 
                         // Set the background color based on whether the reservation was found
                         const backgroundColor = isReservationFound ? "lightgreen" : "lightcoral"; // lightcoral for better readability with black text
-                        const textColor = isReservationFound ? "black" : "black"; // Ensuring text color is set for readability
+                        const textColor = "black"; // Ensuring text color is set for readability
                         
-                        // Format the message based on whether a reservation ID is present
+                        // Format the message
                         const message = isReservationFound 
                                         ? `Booking Number: <strong>${bookingNumber}</strong> - Reservation ID: <strong>${reservationId}</strong>` 
                                         : `Booking Number: <strong>${bookingNumber}</strong> - No matching reservation found`;
@@ -65,19 +69,20 @@ export default {
 
                     // Set the formatted HTML as zaui_object_data to render it in the template
                     this.zaui_object_data = formattedData;
-                    console.log(response.data);
-                })
-                .catch(e => {
-                    console.log(e);
-                });
-        },
+                }
+                console.log(response.data);
+            })
+        .catch(e => {
+            console.log(e);
+        });
+},
+
 
         getBookingByDay(){
             var today = new Date();
             ZauiDataService.getBookingByDay(today)
                 .then(response => {
                     this.zaui_object_data = response.data;
-                    console.log(response.data);
                 })
                 .catch(e => {
                     console.log(e);
@@ -88,18 +93,11 @@ export default {
             ZauiDataService.getManifestByDay(new Date())
                 .then(response => {
                     // Process and map the data for display (to be implemented in the next steps)
-                    this.zaui_object_data = this.mapManifestData(response.data);
-                    console.log(this.zaui_object_data);
+                    this.zaui_object_data = response.data;
                 })
                 .catch(e => {
                     console.log(e);
                 });
-        },
-
-         // Placeholder for the method to map manifest data (to be implemented)
-         mapManifestData(manifestData) {
-            // Mapping logic will be implemented here in the next steps
-            return manifestData;
         },
         
         getGuestProfile() {
