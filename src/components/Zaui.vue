@@ -6,7 +6,6 @@
         <button @click="getGuestProfile">Test Get Guest Profile</button>
         <button @click="testZauiMapping">Test Zaui Mapping</button>
         <div id="zaui_data_box" v-html="zaui_object_data"></div>
-        
     </div>
 </template>
 
