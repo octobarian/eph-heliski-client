@@ -4,6 +4,7 @@
 name: Build and deploy Node.js app to Azure Web App - EagleExClient
 
 on:
+  workflow_dispatch:
 
 jobs:
   build:
