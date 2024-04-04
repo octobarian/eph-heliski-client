@@ -9,6 +9,10 @@ class ReportsDataService {
         // Fetch data for the medical report
         return http.get(`/reports/medicalReport?date=${date}`);
     }
+    getLunchReportData(date) {
+        // Fetch data for the medical report
+        return http.get(`/reports/lunchReport?date=${date}`);
+    }
 }
 
 export default new ReportsDataService();

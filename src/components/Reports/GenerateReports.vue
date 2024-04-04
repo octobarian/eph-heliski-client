@@ -29,8 +29,13 @@
 <script>
 import ReportsDataService from '@/services/ReportsDataService.js';
 //individual reports
-import generateDailyTripsReport from './reportScripts/dailyTripsReport.js'; // Ensure path correctness
-import generateMedicalReport from './reportScripts/medicalReport.js'
+// main.js or any other file
+import {
+  generateDailyTripsReport,
+  generateMedicalReport,
+  generateLunchReport
+} from './reportScripts';
+
 
 export default {
   data() {
@@ -40,6 +45,7 @@ export default {
       reportTypes: [
         'Trips Overview',
         'Medical Report',
+        'Lunch Report',
         // Add other report types here
       ],
     };
@@ -52,6 +58,9 @@ export default {
       if (this.selectedReportType === "Medical Report") {
         this.generateMedicalReport();
       }
+      if (this.selectedReportType === "Lunch Report") {
+        this.generateLunchReport();
+      }
       // Add cases for other reports
     },
 
@@ -60,6 +69,17 @@ export default {
         .then(response => {
           const tripsData = response.data;
           generateDailyTripsReport(tripsData); // Pass the fetched data to the report generation function
+        })
+        .catch(error => {
+          console.error("Error fetching trips for report:", error);
+        });
+    },
+    
+    generateLunchReport() {
+      ReportsDataService.getLunchReportData(this.selectedDate)
+        .then(response => {
+          const lunchData = response.data;
+          generateLunchReport(lunchData); // Pass the fetched data to the report generation function
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
@@ -79,7 +99,7 @@ export default {
 
     testReport() {
       console.log("Testing Report");
-      ReportsDataService.getMedicalReportData(this.selectedDate)
+      ReportsDataService.getLunchReportData(this.selectedDate)
         .then(response => {
           console.log('Test Report Data:', response.data); // Log the response data to the console
         })

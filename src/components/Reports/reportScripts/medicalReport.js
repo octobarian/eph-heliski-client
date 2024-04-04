@@ -18,9 +18,9 @@ export default function generateMedicalReport(data) {
     { header: "Last Name", startPos: 10, width: 40 },
     { header: "First Name", startPos: 50, width: 40 },
     { header: "Weight", startPos: 90, width: 21 }, // Width reduced by 30%
-    { header: "Medical Condition", startPos: 111, width: 44 }, // Width adjusted to prevent cutoff
-    { header: "Dietary Restriction", startPos: 155, width: 35 }, // Width adjusted
-    { header: "Allergies to RX", startPos: 190, width: 25 }, // Width adjusted
+    { header: "Medical Con", startPos: 111, width: 44 }, // Width adjusted to prevent cutoff
+    { header: "Diet Restrict", startPos: 155, width: 35 }, // Width adjusted
+    { header: "Allergy RX", startPos: 190, width: 25 }, // Width adjusted
     { header: "Severity", startPos: 215, width: 25 }, // Width adjusted
     { header: "Prescriptions", startPos: 240, width: 35 }, // Width adjusted to prevent cutoff
   ];
@@ -86,9 +86,9 @@ export default function generateMedicalReport(data) {
               doc.setFontSize(12);
               text = client.weight ? `${client.weight}` : "N/A";
               break;
-            case "Medical Condition":
-            case "Dietary Restriction":
-            case "Allergies to RX":
+            case "Medical Con":
+            case "Diet Restrict":
+            case "Allergy RX":
             case "Severity":
             case "Prescriptions":
               doc.setFontSize(9); // Font size reduced for custom fields
