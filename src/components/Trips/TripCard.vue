@@ -4,11 +4,11 @@
       <div class="row">
         <div>
           <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
-          <select>
-            <option>Private</option>
-            <option>Lodge</option>
-            <option>Day Heli</option>
-            <option>Media</option>
+          <select v-model="editableTripData.triptype" @change="updateTrip" :style="tripTypeStyle">
+            <option value="Private">Private</option>
+            <option value="Lodge">Lodge</option>
+            <option value="Day Heli">Day Heli</option>
+            <option value="Media">Media</option>
           </select>
         </div>
         <p>Trip ID: {{ tripData.tripId }}</p>
@@ -125,6 +125,7 @@ export default {
       editableTripData: {
         pilotId: this.tripData.pilot ? this.tripData.pilot.staffid : '',
         helicopterId: this.tripData.helicopter ? this.tripData.helicopter.helicopterid : '',
+        triptype: this.tripData.triptype || '',
         notes: this.tripData.notes ? this.tripData.notes: [],
         guides: this.tripData.guides || [],
       },
@@ -141,6 +142,9 @@ export default {
       if (newVal !== oldVal) this.updateTrip();
     },
     'editableTripData.helicopterId': function(newVal, oldVal) {
+      if (newVal !== oldVal) this.updateTrip();
+    },
+    'editableTripData.triptype': function(newVal, oldVal) {
       if (newVal !== oldVal) this.updateTrip();
     },
     selectedGuideId(newValue) {
@@ -164,6 +168,30 @@ export default {
           isDisabled: isGuideSelected // Add an isDisabled property
         };
       });
+    },
+    tripTypeStyle() {
+      let borderColor = '';
+
+      switch (this.editableTripData.triptype) {
+        case 'Private':
+          borderColor = 'var(--private-event-color)';
+          break;
+        case 'Lodge':
+          borderColor = 'var(--lodge-event-color)';
+          break;
+        case 'Day Heli':
+          borderColor = 'var(--day-event-color)';
+          break;
+        case 'Media':
+          borderColor = 'var(--minor-media-event-color)';
+          break;
+        default:
+          borderColor = '#ccc'; // Default border color
+      }
+
+      return {
+        border: `2px solid ${borderColor}`
+      };
     }
   },
   methods: {
@@ -320,12 +348,14 @@ export default {
       const updatedTripData = {
         pilotid: this.editableTripData.pilotId,
         helicopterid: this.editableTripData.helicopterId,
+        triptype: this.editableTripData.triptype
       };
 
       TripDataService.update(this.tripData.tripId, updatedTripData)
         .then(response => {
           this.tripData.helicopterId = this.editableTripData.helicopterId;
           this.tripData.pilotId = this.editableTripData.pilotId;
+          this.tripData.triptype = this.editableTripData.triptype;
           console.log(response);
         })
         .catch(error => {
@@ -376,6 +406,7 @@ export default {
       TripDataService.delete(this.tripData.tripId)
         .then(() => {
           this.$emit('tripDeleted', this.tripData.tripId);
+          this.updateTrip();
         })
         .catch(error => {
           console.error("Error deleting trip:", error);

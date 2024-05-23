@@ -22,6 +22,12 @@ const router = new Router({
       name: "main-guide",
       component: () => import("@/components/Greeting-Guide")
     },
+    //Shuttle Routes
+    {
+      path: "/shuttles",
+      name: "shuttles",
+      component: () => import("@/components/Shuttles/Shuttles.vue")
+    },
     //Equipment Routes
     {
       path: "/beaconlist",
