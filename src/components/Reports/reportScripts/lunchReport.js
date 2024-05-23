@@ -112,8 +112,9 @@ export default function generateLunchReport(data) {
     doc.text(`Helicopter ${helicopter.helicopterId} Guest Lunches: ${totalGuestLunches}`, 10, yPos);
   });
 
-  // Save the PDF
-  doc.save("group-lunch-report.pdf");
+  const today = new Date();
+  const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  doc.save(`daily-lunch-report-${dateString}.pdf`);
 }
 
 function splitTextToLines(text, maxLength) {

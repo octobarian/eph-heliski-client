@@ -35,7 +35,7 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="bookingsDropdown">
                 <router-link to="/reservationlist" class="dropdown-item">Reservations</router-link>
-                <router-link to="/trips" class="dropdown-item">Trips</router-link>
+                <!-- <router-link to="/trips" class="dropdown-item">Trips</router-link> -->
               </ul>
             </li>
             <!-- People Dropdown -->

@@ -1,30 +1,32 @@
 <template>
   <div class="reports-page">
     <h1 class="reports-title">Reports</h1>
-
     <div class="report-generation-box">
       <!-- Date Selector -->
       <div class="form-group">
         <label for="reportDate">Report Date</label>
         <input type="date" id="reportDate" class="form-control" v-model="selectedDate">
       </div>
+      <!-- Report Type Selector -->
       <div class="form-group">
         <label for="reportType">Report Type</label>
-        <select id="reportType" class="form-control" v-model="selectedReportType">
-          <option disabled value="">Select a report</option>
+        <select id="reportType" class="form-control" v-model="selectedReportTypes" multiple>
           <option v-for="type in reportTypes" :key="type" :value="type">{{ type }}</option>
         </select>
       </div>
+      <!-- Select/Deselect All Checkbox -->
       <div class="form-group">
-        <label for="btn-generate-report">.</label>
-        <button class="btn-generate-report" @click="generateReport">Generate/Download Report</button>
+        <input type="checkbox" id="selectAll" v-model="selectAll" @change="toggleSelectAll">
+        <label for="selectAll">Select/Deselect All</label>
       </div>
+      <!-- Generate Report Button -->
       <div class="form-group">
-        <button class="btn-test-report" @click="testReport">Test Report Data Fetch</button>
+        <button class="btn-generate-report" @click="generateReports">Generate/Download Reports</button>
       </div>
     </div>
   </div>
 </template>
+
 
 <script>
 import ReportsDataService from '@/services/ReportsDataService.js';
@@ -40,28 +42,35 @@ import {
 export default {
   data() {
     return {
-      selectedReportType: '',
-      selectedDate: new Date().toISOString().substr(0, 10), // Set default to today's date
+      selectedReportTypes: [],
+      selectAll: false,
+      selectedDate: new Date().toISOString().substr(0, 10),
       reportTypes: [
         'Trips Overview',
         'Medical Report',
         'Lunch Report',
-        // Add other report types here
       ],
     };
   },
   methods: {
-    generateReport() {
-      if (this.selectedReportType === "Trips Overview") {
-        this.generateTodaysTripsOverview();
-      }
-      if (this.selectedReportType === "Medical Report") {
-        this.generateMedicalReport();
-      }
-      if (this.selectedReportType === "Lunch Report") {
-        this.generateLunchReport();
-      }
-      // Add cases for other reports
+    generateReports() {
+      this.selectedReportTypes.forEach(reportType => {
+        switch (reportType) {
+          case 'Trips Overview':
+            this.generateTodaysTripsOverview();
+            break;
+          case 'Medical Report':
+            this.generateMedicalReport();
+            break;
+          case 'Lunch Report':
+            this.generateLunchReport();
+            break;
+          // Add cases for other reports
+        }
+      });
+    },
+    toggleSelectAll() {
+      this.allSelected = !this.allSelected;
     },
 
     generateTodaysTripsOverview() {
@@ -107,6 +116,28 @@ export default {
           console.error("Error during test fetch for report:", error);
         });
     },
+  },
+  mounted() {
+    // Auto-select all reports when component mounts
+    this.selectAll = true;
+    this.toggleSelectAll();
+  },
+  computed: {
+    // Computed property to handle the select all functionality dynamically
+    allSelected: {
+      get() {
+        return this.reportTypes.length && this.selectedReportTypes.length === this.reportTypes.length;
+      },
+      set(value) {
+        this.selectedReportTypes = value ? this.reportTypes.slice() : [];
+      }
+    }
+  },
+  watch: {
+    // Watcher to automatically update the selectAll based on selections
+    selectedReportTypes(newValues) {
+      this.selectAll = newValues.length === this.reportTypes.length;
+    }
   },
 };
 </script>

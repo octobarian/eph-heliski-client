@@ -125,6 +125,7 @@ export default function generateMedicalReport(data) {
     });
   });
 
-  // Save the PDF
-  doc.save("medical-report.pdf");
+  const today = new Date();
+  const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
+  doc.save(`daily-medical-report-${dateString}.pdf`);
 }

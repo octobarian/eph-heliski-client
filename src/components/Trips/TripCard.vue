@@ -2,7 +2,15 @@
   <div class="trip-card card">
     <div class="card-header">
       <div class="row">
-        <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
+        <div>
+          <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
+          <select>
+            <option>Private</option>
+            <option>Lodge</option>
+            <option>Day Heli</option>
+            <option>Media</option>
+          </select>
+        </div>
         <p>Trip ID: {{ tripData.tripId }}</p>
       </div>
       <div class=" row pilots-helicopters-section">
