@@ -2,9 +2,6 @@
     <div class="list row">
       <div class="col-md-8">
         <div class="input-group mb-3">
-          <div>
-            <p>Testing: The serverip is {{ serverIP }} </p>
-          </div>
           <input type="text" class="form-control" placeholder="Search by name, email, ID, or group code"
             v-model="searchQuery"/>
           <div class="input-group-append">
