@@ -4,7 +4,7 @@ class ReportsDataService {
     getDailyTripsReportData(date) {
         // Use the date parameter in the API request
         return http.get(`/reports/dailyTripsReport?date=${date}`);
-      }
+    }
     getMedicalReportData(date) {
         // Fetch data for the medical report
         return http.get(`/reports/medicalReport?date=${date}`);
@@ -12,6 +12,10 @@ class ReportsDataService {
     getLunchReportData(date) {
         // Fetch data for the medical report
         return http.get(`/reports/lunchReport?date=${date}`);
+    }
+    getDailyShuttleReportData(date) {
+        // Fetch data for the daily shuttle report
+        return http.get(`/reports/dailyShuttleReport?date=${date}`);
     }
 }
 

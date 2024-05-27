@@ -31,13 +31,12 @@
 <script>
 import ReportsDataService from '@/services/ReportsDataService.js';
 //individual reports
-// main.js or any other file
 import {
   generateDailyTripsReport,
   generateMedicalReport,
-  generateLunchReport
+  generateLunchReport,
+  generateShuttleReport
 } from './reportScripts';
-
 
 export default {
   data() {
@@ -49,6 +48,7 @@ export default {
         'Trips Overview',
         'Medical Report',
         'Lunch Report',
+        'Shuttle Report' 
       ],
     };
   },
@@ -57,15 +57,17 @@ export default {
       this.selectedReportTypes.forEach(reportType => {
         switch (reportType) {
           case 'Trips Overview':
-            this.generateTodaysTripsOverview();
+            this.generateDateTripsOverview();
             break;
           case 'Medical Report':
-            this.generateMedicalReport();
+            this.generateDateMedicalReport();
             break;
           case 'Lunch Report':
-            this.generateLunchReport();
+            this.generateDateLunchReport();
             break;
-          // Add cases for other reports
+          case 'Shuttle Report':
+            this.generateDateShuttleReport(); 
+            break;
         }
       });
     },
@@ -73,7 +75,7 @@ export default {
       this.allSelected = !this.allSelected;
     },
 
-    generateTodaysTripsOverview() {
+    generateDateTripsOverview() {
       ReportsDataService.getDailyTripsReportData(this.selectedDate)
         .then(response => {
           const tripsData = response.data;
@@ -84,7 +86,7 @@ export default {
         });
     },
     
-    generateLunchReport() {
+    generateDateLunchReport() {
       ReportsDataService.getLunchReportData(this.selectedDate)
         .then(response => {
           const lunchData = response.data;
@@ -95,7 +97,7 @@ export default {
         });
     },
 
-    generateMedicalReport() {
+    generateDateMedicalReport() {
       ReportsDataService.getMedicalReportData(this.selectedDate)
         .then(response => {
           const medicalData = response.data;
@@ -103,6 +105,17 @@ export default {
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
+        });
+    },
+
+    generateDateShuttleReport() {
+      ReportsDataService.getDailyShuttleReportData(this.selectedDate)
+        .then(response => {
+          const shuttleData = response.data;
+          generateShuttleReport(shuttleData); // Pass the fetched data to the report generation function
+        })
+        .catch(error => {
+          console.error("Error fetching shuttle data for report:", error);
         });
     },
 
