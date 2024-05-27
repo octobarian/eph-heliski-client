@@ -13,10 +13,14 @@
         <div style="margin-bottom: 12px; padding-bottom: 12px">
             <button @click="getGuestProfile">Test Get Guest Profile</button>
         </div>
+        <div style="margin-bottom: 12px; padding-bottom: 12px">
+            <label for="bookingNumber">Booking Number:</label>
+            <input type="text" id="bookingNumber" v-model="bookingNumber">
+            <button @click="getBookingByNumber">Get Booking By Number</button>
+        </div>
         <div id="zaui_data_box" v-html="zaui_object_data"></div>
     </div>
 </template>
-
 
 <script>
 import ZauiDataService from "../services/ZauiDataService";
@@ -27,7 +31,8 @@ export default {
         return {
             submitted: false,
             zaui_object_data: "gathered data will show up here...",
-            selectedDate: new Date().toISOString().substr(0, 10) // Default to today's date
+            selectedDate: new Date().toISOString().substr(0, 10), // Default to today's date
+            bookingNumber: '' // Add bookingNumber to the data properties
         };
     },
     methods: {
@@ -45,36 +50,23 @@ export default {
         testZauiMapping() {
             ZauiDataService.checkZauiMapping(new Date(this.selectedDate))
                 .then(response => {
-                    // Check if the response contains the 'no manifest found' message
                     if (response.data.length === 1 && response.data[0].startsWith("No")) {
-                        // Display a red background box with the message
                         this.zaui_object_data = `<div style="background-color: red; color: white; padding: 10px;">${response.data[0]}</div>`;
                     } else {
-                        // Proceed with the existing logic for formatting the data
                         let formattedData = "<ul style='list-style-type: none; padding: 0;'>";
                         response.data.forEach(item => {
                             const parts = item.split(" ");
-                            const bookingNumber = parts[3]; // Assuming 'bookingNumber' is the fourth word in the string
-                            const reservationId = parts[parts.length - 1]; // Assuming 'id' is the last word in the string
-                            
-                            // Determine if the reservation was found or not
+                            const bookingNumber = parts[3];
+                            const reservationId = parts[parts.length - 1];
                             const isReservationFound = !item.includes("No matching reservation found");
-
-                            // Set the background color based on whether the reservation was found
-                            const backgroundColor = isReservationFound ? "lightgreen" : "lightcoral"; // lightcoral for better readability with black text
-                            const textColor = "black"; // Ensuring text color is set for readability
-                            
-                            // Format the message
+                            const backgroundColor = isReservationFound ? "lightgreen" : "lightcoral";
+                            const textColor = "black";
                             const message = isReservationFound 
                                             ? `Booking Number: <strong>${bookingNumber}</strong> - Reservation ID: <strong>${reservationId}</strong>` 
                                             : `Booking Number: <strong>${bookingNumber}</strong> - No matching reservation found`;
-
-                            // Add to the HTML string with styled backgrounds
                             formattedData += `<li style="background-color: ${backgroundColor}; color: ${textColor}; padding: 5px; margin-bottom: 2px;">${message}</li>`;
                         });
                         formattedData += "</ul>";
-
-                        // Set the formatted HTML as zaui_object_data to render it in the template
                         this.zaui_object_data = formattedData;
                     }
                     console.log(response.data);
@@ -85,8 +77,7 @@ export default {
         },
 
         getBookingByDay(){
-            var today = new Date();
-            ZauiDataService.getBookingByDay(today)
+            ZauiDataService.getBookingByDay(new Date(this.selectedDate))
                 .then(response => {
                     this.zaui_object_data = response.data;
                 })
@@ -98,10 +89,7 @@ export default {
         getManifestByDate() {
             ZauiDataService.getManifestByDay(new Date(this.selectedDate))
                 .then(response => {
-                    // Check if the response is an array and count the number of objects
                     const numberOfObjects = Array.isArray(response.data) ? response.data.length : 0;
-                    // Process and map the data for display
-                    this.zaui_object_data = response.data;
                     this.zaui_object_data = `Finished Mapping, ${numberOfObjects} objects found. Now run Test Zaui Mapping.`;
                 })
                 .catch(e => {
@@ -110,9 +98,7 @@ export default {
                 });
         },
 
-        
         getGuestProfile() {
-            // Create a placeholder booking object
             const booking = {
                 bookingNumber: "16322",
                 guestFirstName: "Colin",
@@ -120,22 +106,27 @@ export default {
                 mobile: "4165602257",
                 email: "wisecolin21@gmail.com"
             };
-
-            // Call the service and pass the booking object
             ZauiDataService.getGuestProfile(booking)
                 .then(response => {
                     this.zaui_object_data = response;
-                // Handle the response data
                 })
                 .catch(error => {
                     console.error("Error getting guest profile:", error);
-                    // Handle the error
                 });
         },
+
+        getBookingByNumber() {
+            ZauiDataService.getBookingByNumber(this.bookingNumber)
+                .then(response => {
+                    this.zaui_object_data = JSON.stringify(response.data, null, 2); // Pretty print JSON
+                })
+                .catch(e => {
+                    console.log(e);
+                });
+        }
     }
 }
 </script>
-
 
 <style type="css">
 #zaui_data_box{
