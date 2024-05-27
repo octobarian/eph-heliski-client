@@ -31,29 +31,29 @@ export default function generateShuttleReport(data) {
 
   // Drawing the headers for each group section
   const drawHeaders = (doc, y) => {
-    doc.setFontSize(10);
+    doc.setFontSize(8);
     const headers = [
-      { header: 'First Name', width: 40 },
-      { header: 'Last Name', width: 40 },
-      { header: 'Phone', width: 40 },
-      { header: 'Email', width: 60 },
-      { header: 'Shuttle Name', width: 40 },
-      { header: 'Dropoff Location', width: 40 },
-      { header: 'Arrival Time', width: 30 },
-      { header: 'Flight Time', width: 30 },
-      { header: 'Pickup Location', width: 40 }
+      { header: 'First Name', width: 30 },
+      { header: 'Last Name', width: 30 },
+      { header: 'Phone', width: 30 },
+      { header: 'Email', width: 50 },
+      { header: 'Shuttle Number', width: 30 },
+      { header: 'Pickup Time', width: 25 },
+      { header: 'Pickup Location', width: 30 },
+      { header: 'Arrival Time', width: 25 },
+      { header: 'Dropoff Location', width: 30 }
     ];
 
     let x = 10;
     headers.forEach(head => {
       doc.setDrawColor(0);
       doc.setFillColor(211, 211, 211);
-      doc.rect(x, y, head.width, 10, 'FD');
-      doc.text(head.header, x + 5, y + 7);
+      doc.rect(x, y, head.width, 8, 'FD');
+      doc.text(head.header, x + 2, y + 6);
       x += head.width;
     });
 
-    return y + 10;
+    return y + 12;
   };
 
   // Process data
@@ -64,33 +64,33 @@ export default function generateShuttleReport(data) {
 
   shuttleNames.forEach((shuttleName, index) => {
     if (index > 0) doc.addPage('landscape');
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.text(`Shuttle Name: ${shuttleName}`, 10, 20);
-    let y = 30;
+    let y = 38; // Adjusted for the first row's first client
 
     const shuttleData = data.filter(item => item.shuttleName === shuttleName);
     y = drawHeaders(doc, y);
 
     shuttleData.forEach(item => {
       let x = 10;
-      doc.setFontSize(10);
+      doc.setFontSize(8);
       doc.text(String(item.firstname), x, y);
-      x += 40;
+      x += 30;
       doc.text(String(item.lastname), x, y);
-      x += 40;
+      x += 30;
       doc.text(String(item.phone), x, y);
-      x += 40;
+      x += 30;
       doc.text(String(item.email), x, y);
-      x += 60;
+      x += 50;
       doc.text(String(item.shuttleName), x, y);
-      x += 40;
-      doc.text(String(item.dropoff_location), x, y);
-      x += 40;
-      doc.text(String(item.arrival_time), x, y);
       x += 30;
-      doc.text(String(item.flight_time), x, y);
-      x += 30;
+      doc.text(String(item.flight_time), x, y); // Renamed from 'Flight Time' to 'Pickup Time'
+      x += 25;
       doc.text(String(item.pickup_location), x, y);
+      x += 30;
+      doc.text(String(item.arrival_time), x, y);
+      x += 25;
+      doc.text(String(item.dropoff_location), x, y);
       y += 10;
     });
   });
