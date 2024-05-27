@@ -11,7 +11,7 @@
             <option value="Media">Media</option>
           </select>
         </div>
-        <p>Trip ID: {{ tripData.tripId }}</p>
+        <!-- <p>Trip ID: {{ tripData.tripId }}</p> -->
       </div>
       <div class=" row pilots-helicopters-section">
         <!-- Pilots Section -->
@@ -51,10 +51,12 @@
       </div>
       <div class="trip-groups-container">
         <trip-group
-          v-for="(group) in tripData.groups"
+          v-for="(group, index) in tripData.groups"
           :key="group.groupid"
           :group-id="group.groupid"
-          :groupEndDate = "group.end_date"
+          :groupIndex="index"
+          :heliNumber="tripNumber"
+          :groupEndDate="group.end_date"
           :guide="group.guide"
           :clients="group.clients"
           :all-guides="allGuides"

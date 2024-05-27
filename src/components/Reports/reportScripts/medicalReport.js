@@ -44,7 +44,7 @@ export default function generateMedicalReport(data) {
     // Helicopter header
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0); // Set text color to black
-    doc.text(`Helicopter: ${helicopter.helicopterId}`, 10, yPos);
+    doc.text(`Heli #${helicopter.heliIndex}: ${helicopter.helicopterId}`, 10, yPos);
     yPos += 10;
     doc.setFillColor(200, 200, 200); // Line 48: Change the RGB color to light grey
 
@@ -56,7 +56,7 @@ export default function generateMedicalReport(data) {
       doc.rect(10, yPos, headerConfig.reduce((sum, hc) => sum + hc.width, 0), 8, 'F'); // Draw filled rectangle for header background
       doc.setTextColor(0, 0, 0); // Set text color to black
       doc.setFontSize(12);
-      doc.text(`Group ID: ${group.groupId}`, 12, yPos + 5);
+      doc.text(`Group #${group.groupIndex}`, 12, yPos + 5);
       yPos += 10;
 
       // Print headers with background color
@@ -66,7 +66,7 @@ export default function generateMedicalReport(data) {
       });
 
       yPos += 12; // Adding space for data entries
-      var biggestExtraSpace = 0
+      var biggestExtraSpace = 0;
 
       group.clients.forEach(client => {
         yPos = checkPageOverflow(yPos);
@@ -103,19 +103,19 @@ export default function generateMedicalReport(data) {
           var extraSpace;
 
           if (fieldLength > 1) {
-              // If there are newlines, stick with newline calculation
-              extraSpace = 2 * (fieldLength + 1);
+            // If there are newlines, stick with newline calculation
+            extraSpace = 2 * (fieldLength + 1);
           } else {
-              // If no newlines, check if text length is greater than 20
-              if (text.length > 20) {
-                  extraSpace = 2; // If text length is greater than 20, set extraSpace to 2
-              } else if (text.length > 40) {
-                  extraSpace = 4;
-              } else {
-                  extraSpace = 0; // Otherwise, no extra space needed
-              }
+            // If no newlines, check if text length is greater than 20
+            if (text.length > 20) {
+              extraSpace = 2; // If text length is greater than 20, set extraSpace to 2
+            } else if (text.length > 40) {
+              extraSpace = 4;
+            } else {
+              extraSpace = 0; // Otherwise, no extra space needed
+            }
           }
-          if(extraSpace > biggestExtraSpace){biggestExtraSpace = extraSpace}
+          if (extraSpace > biggestExtraSpace) { biggestExtraSpace = extraSpace; }
         });
         yPos += 6 + biggestExtraSpace;
         biggestExtraSpace = 0;

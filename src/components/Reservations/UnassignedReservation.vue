@@ -40,21 +40,21 @@
 
       <div class="row">
         <div class="select-group">
-          <label for="UAtrip-selector">Trip ID:</label>
+          <label for="UAtrip-selector">Trip:</label>
           <select name="UAtrip-selector" v-model="selectedTrip" class="UAtrip-selector form-select me-2" @change="fetchGroupsForTrip">
             <option disabled value="">Select Trip</option>
-            <option v-for="trip in trips" :key="trip.tripId" :value="trip.tripId">
-              #{{ trip.tripId }}
+            <option v-for="(trip, index) in sortedTrips" :key="trip.tripId" :value="trip.tripId">
+              Trip #{{ index + 1 }}
             </option>
           </select>
         </div>
         <!-- New group selection dropdown, shown only if there are groups -->
         <div class="select-group" v-if="showGroupDropdown">
-          <label for="UAgroup-selector">Group ID:</label>
-          <select name="UAgroup-selector" v-model="selectedGroup" class=" UAgroup-selector form-select me-2">
+          <label for="UAgroup-selector">Group:</label>
+          <select name="UAgroup-selector" v-model="selectedGroup" class="UAgroup-selector form-select me-2">
             <option disabled value="">Select Group</option>
-            <option v-for="group in groups" :key="group.trip_group_id" :value="group.trip_group_id">
-              #{{ group.trip_group_id }}
+            <option v-for="(group, index) in sortedGroups" :key="group.trip_group_id" :value="group.trip_group_id">
+              Group #{{ index + 1 }}
             </option>
           </select>
         </div>
@@ -90,7 +90,7 @@ export default {
         .then(response => {
           this.groups = response.data; // Assuming the response contains an array of groups
           this.selectedGroup = ''; // Reset selectedGroup when trip changes
-          if(this.groups.length > 0){
+          if (this.groups.length > 0) {
             this.showGroupDropdown = true;
           }
         })
@@ -104,7 +104,8 @@ export default {
         tripId: this.selectedTrip, 
         groupId: this.selectedGroup,
         reservationId: this.reservation.reservationid, 
-        personId:this.reservation.personid });
+        personId: this.reservation.personid 
+      });
     },
     formatKey(key) {
       // Capitalize and replace underscores with spaces
@@ -131,13 +132,17 @@ export default {
       }
       return ''; // default class if needed
     },
+    sortedTrips() {
+      return this.trips.slice().sort((a, b) => a.tripId - b.tripId);
+    },
+    sortedGroups() {
+      return this.groups.slice().sort((a, b) => a.trip_group_id - b.trip_group_id);
+    }
   },
-
 };
 </script>
 
 <style scoped>
-
 .select-group {
   margin-bottom: 1rem;
 }
@@ -188,8 +193,7 @@ export default {
   text-decoration: none;
 }
 
-
-.assign-button{
+.assign-button {
   background-color: var(--primary-eph-color);
 }
 
@@ -265,5 +269,3 @@ export default {
   margin-bottom: 10px;
 }
 </style>
-
-  

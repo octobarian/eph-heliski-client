@@ -40,7 +40,6 @@ export default function generateGuideReport(data) {
   
     doc.addPage('landscape'); // Add a new page for the detailed reports
   };
-  
 
   // Drawing the headers for each group section
   const drawHeaders = (doc, y) => {
@@ -68,13 +67,13 @@ export default function generateGuideReport(data) {
   };
 
   // Assuming 'data' is an array where each entry represents a helicopter's data.
-  const allHelicopterIds = data.map(helicopter => helicopter.helicopterId);
+  const allHelicopterIds = data.map(helicopter => `Heli #${helicopter.heliIndex}`);
   const allGroupIds = [];
   let totalClients = 0;
 
   data.forEach(helicopter => {
     helicopter.groups.forEach(group => {
-      allGroupIds.push(group.groupId);
+      allGroupIds.push(`Group #${group.groupIndex}`);
       totalClients += group.clients.length;
     });
   });
@@ -85,14 +84,14 @@ export default function generateGuideReport(data) {
   data.forEach((helicopter, index) => {
     if (index > 0) doc.addPage('landscape');
     doc.setFontSize(16);
-    doc.text(`Helicopter: ${helicopter.helicopterId}`, 10, 20);
+    doc.text(`Heli #${helicopter.heliIndex}`, 10, 20);
     doc.text(`Pilot: ${helicopter.pilot}`, 10, 30);
     let y = 40;
 
     helicopter.groups.forEach(group => {
       let totalWeight = 0;
       doc.setFontSize(14);
-      doc.text(`Group ${group.groupId}`, 10, y - 5);
+      doc.text(`Group #${group.groupIndex}`, 10, y - 5);
       y = drawHeaders(doc, y);
       y += 5;
 

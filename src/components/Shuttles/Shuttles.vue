@@ -11,10 +11,10 @@
       <p>No trips found for the selected date.</p>
     </div>
     <div v-else class="trips-container">
-      <div v-for="trip in trips" :key="trip.tripId" class="trip-card">
-        <h2>Trip ID: {{ trip.tripId }} ({{ trip.triptype || '' }})</h2>
-        <div v-for="group in trip.groups" :key="group.groupid" class="group-card">
-          <h3>Group ID: {{ group.groupid }}</h3>
+      <div v-for="(trip, tripIndex) in sortedTrips" :key="trip.tripId" class="trip-card">
+        <h2>Heli #{{ tripIndex + 1 }} ({{ trip.triptype || '' }})</h2>
+        <div v-for="(group, groupIndex) in sortedGroups(trip.groups)" :key="group.groupid" class="group-card">
+          <h3>Group #{{ groupIndex + 1 }}</h3>
           <div v-for="client in group.clients" :key="client.tripClientId" class="client-row">
             <div class="client-info">
               <span>{{ client.person.firstname }} {{ client.person.lastname }} ({{ trip.triptype || '' }})</span>
@@ -29,20 +29,20 @@
               </select>
             </div>
             <div class="form-group-inline">
-              <label for="dropoffLocation">Dropoff Location:</label>
-              <input type="text" v-model="client.dropoffLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+              <label for="pickupTime">Pickup Time:</label>
+              <input type="time" v-model="client.flightTime" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+            </div>
+            <div class="form-group-inline">
+              <label for="pickupLocation">Pickup Location:</label>
+              <input type="text" v-model="client.pickupLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
             </div>
             <div class="form-group-inline">
               <label for="arrivalTime">Arrival Time:</label>
               <input type="time" v-model="client.arrivalTime" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
             </div>
             <div class="form-group-inline">
-              <label for="flightTime">Flight Time:</label>
-              <input type="time" v-model="client.flightTime" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
-            </div>
-            <div class="form-group-inline">
-              <label for="pickupLocation">Pickup Location:</label>
-              <input type="text" v-model="client.pickupLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+              <label for="dropoffLocation">Dropoff Location:</label>
+              <input type="text" v-model="client.dropoffLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
             </div>
           </div>
         </div>
@@ -131,6 +131,14 @@ export default {
           console.error("Error updating client shuttle details:", error);
         });
     },
+    sortedGroups(groups) {
+      return groups.slice().sort((a, b) => a.groupid - b.groupid);
+    },
+  },
+  computed: {
+    sortedTrips() {
+      return this.trips.slice().sort((a, b) => a.tripId - b.tripId);
+    }
   },
   created() {
     this.fetchTripsByDate();

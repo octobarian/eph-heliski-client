@@ -63,7 +63,7 @@ export default function generateLunchReport(data) {
       // Group header
       doc.setFontSize(14);
       doc.setTextColor(primaryColor); // Set group header color to primary color
-      doc.text(`Group ${group.groupId} - - Helicopter: ${helicopter.helicopterId}`, 10, yPos);
+      doc.text(`Heli #${helicopter.heliIndex} - Group #${group.groupIndex}`, 10, yPos);
       yPos += 10; // Move down for headers
 
       // Draw the headers
@@ -109,7 +109,7 @@ export default function generateLunchReport(data) {
     doc.setFontSize(12);
     let totalGuestLunches = helicopter.groups.reduce((acc, group) => acc + group.clients.length, 0);
     doc.setTextColor(blackColor); // Reset text color to black for footer
-    doc.text(`Helicopter ${helicopter.helicopterId} Guest Lunches: ${totalGuestLunches}`, 10, yPos);
+    doc.text(`Heli #${helicopter.heliIndex} Guest Lunches: ${totalGuestLunches}`, 10, yPos);
   });
 
   const today = new Date();
