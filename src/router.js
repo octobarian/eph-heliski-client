@@ -56,6 +56,12 @@ const router = new Router({
       component: () => import('@/components/Reservations/Reservation.vue'),
       props: true
     },
+    //Runs Routes
+    {
+      path: "/runsadmin",
+      name: "runsadmin",
+      component: () => import("@/components/Runs/RunsAdmin.vue")
+    },
     //Reports Routes
     {
       path: "/generatereports",
