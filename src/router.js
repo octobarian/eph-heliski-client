@@ -28,6 +28,12 @@ const router = new Router({
       name: "shuttles",
       component: () => import("@/components/Shuttles/Shuttles.vue")
     },
+    //Wildlife Routes
+    {
+      path: "/wildlifeadmin",
+      name: "wildlifeadmin",
+      component: () => import("@/components/Wildlife/WildlifeAdmin.vue")
+    },
     //Equipment Routes
     {
       path: "/beaconlist",

@@ -40,6 +40,7 @@
               <ul class="dropdown-menu" aria-labelledby="dailyDropdown">
               <router-link to="/shuttles" class="dropdown-item">Assign Shuttles</router-link>
               <router-link to="/runsadmin" class="dropdown-item">Runs/Zones Admin</router-link>
+              <router-link to="/wildlifeadmin" class="dropdown-item">Wildlife Admin</router-link>
               </ul>
             </li>
             <li>|</li>
