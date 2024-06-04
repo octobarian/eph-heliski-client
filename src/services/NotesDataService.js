@@ -17,6 +17,14 @@ class NotesDataService {
         return http.get(`/notes/trip/${tripId}`);
     }
 
+    getRunsNote(tripRunId) {
+        return http.get(`/notes/run/${tripRunId}`);
+    }
+
+    getGroupNote(tripGroupId){
+        return http.get(`/notes/group/${tripGroupId}`);
+    }
+
     update(id, data) {
         return http.put(`/notes/${id}`, data);
     }

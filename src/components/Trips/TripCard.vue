@@ -305,10 +305,12 @@ export default {
     },
 
     saveNote() {
-      if (!this.loggedInPersonId) {
-        console.error('No logged in person ID found');
-        return;
-      }
+      //For now, notes arent attached via author.
+      this.loggedInPersonId = 1;
+      // if (!this.loggedInPersonId) {
+      //   console.error('No logged in person ID found');
+      //   return;
+      // }
 
       // Define noteData within the scope of saveNote method
       const noteData = {
@@ -322,7 +324,6 @@ export default {
         // Update the existing note
         NotesDataService.update(this.noteId, noteData)
           .then(() => {
-            console.log("Note updated successfully");
             this.updateTrip();
           })
           .catch(error => {
@@ -333,7 +334,6 @@ export default {
         NotesDataService.create(noteData)
           .then(response => {
             this.noteId = response.data.noteid;
-            console.log("Note created successfully");
             this.updateTrip();
           })
           .catch(error => {
