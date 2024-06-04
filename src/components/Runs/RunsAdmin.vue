@@ -54,6 +54,9 @@
                 <div class="notes-container">
                   <textarea v-model="group.noteContent" placeholder="Enter note here..."></textarea>
                   <button class="save-note" @click="saveNoteForGroup(trip.tripId, group.groupid, group)">Save Note</button>
+                  <transition name="fade">
+                    <span v-if="group.noteSaved" class="saved-message">Saved!</span>
+                  </transition>
                 </div>
               </div>
             </div>
@@ -252,11 +255,12 @@ export default {
         .then(response => {
           this.trips = response.data;
           this.fetchTripRuns(this.trips.map(trip => trip.tripId));
-          // this.trips.forEach(trip => {
-          //   trip.groups.forEach(group => {
-          //     this.fetchNoteForGroup(trip.tripId, group.groupid, group);
-          //   });
-          // });
+          this.trips.forEach(trip => {
+            trip.groups.forEach(group => {
+              this.$set(group, 'noteSaved', false); // Ensure noteSaved is reactive
+              this.fetchNoteForGroup(trip.tripId, group.groupid, group);
+            });
+          });
         })
         .catch(e => {
           console.log(e);
@@ -444,6 +448,7 @@ export default {
           .then(() => {
             console.log("Note updated successfully");
             this.updateGroupNotes(tripId, groupId);
+            this.animateSavedMessage(group);
           })
           .catch(error => {
             console.error("Error updating note:", error);
@@ -454,11 +459,18 @@ export default {
             group.noteId = response.data.noteid;
             console.log("Note created successfully");
             this.updateGroupNotes(tripId, groupId);
+            this.animateSavedMessage(group);
           })
           .catch(error => {
             console.error("Error creating note:", error);
           });
       }
+    },
+    animateSavedMessage(group) {
+      group.noteSaved = true;
+      setTimeout(() => {
+        this.$set(group, 'noteSaved', false); // Use Vue's $set to ensure reactivity
+      }, 3000); // Show the message for 3 seconds
     },
     updateGroupNotes(tripId, groupId) {
       console.log(groupId)
@@ -586,6 +598,27 @@ export default {
   bottom: 5px;
   right: 5px;
   padding: 5px 10px;
+}
+
+.saved-message {
+  position: absolute;
+  bottom: 40px;
+  right: 5px;
+  color: blue;
+  font-weight: bold;
+  transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+}
+
+.saved-message-enter-active,
+.saved-message-leave-active {
+  transition: all 0.5s;
+}
+
+.saved-message-enter, 
+.saved-message-leave-to {
+  opacity: 0;
+  bottom: 40px;
+  transform: translateY(20px);
 }
 
 .delete-button {
