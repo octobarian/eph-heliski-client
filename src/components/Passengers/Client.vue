@@ -20,7 +20,7 @@
             <p><strong>Email:</strong> {{ person.email }}</p>
             <p><strong>Country:</strong> {{ person.country }}</p>
             <p><strong>Date of Birth:</strong> {{ person.dateofbirth }}</p>
-            <p><strong>Weight:</strong> {{ person.weight }} kg</p>
+            <p><strong>Weight:</strong> {{ person.weight }} lbs</p>
           </div>
           <div class="loading" v-else>
             <p>Loading person details...</p>
