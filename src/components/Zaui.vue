@@ -6,7 +6,7 @@
         </div>
         <div style="margin-bottom: 12px; padding-bottom: 12px">
             <label for="manifestDate">Select Date:</label>
-            <input type="date" id="manifestDate" v-model="selectedDate">
+            <input type="date" id="manifestDate" v-model="selectedDate" @change="handleDateChange">
             <button @click="getManifestByDate">Get Manifest By Date</button>
             <button @click="testZauiMapping">Test Zaui Mapping</button>
         </div>
@@ -31,12 +31,21 @@ export default {
         return {
             submitted: false,
             zaui_object_data: "gathered data will show up here...",
-            selectedDate: new Date().toISOString().substr(0, 10), // Default to today's date
+            selectedDate: this.getStoredDate() || new Date().toISOString().substr(0, 10), // Default to today's date
             bookingNumber: '' // Add bookingNumber to the data properties
         };
     },
     methods: {
-        getZauiPing(){
+        getStoredDate() {
+            return sessionStorage.getItem('selectedDate');
+        },
+        storeDate(date) {
+            sessionStorage.setItem('selectedDate', date);
+        },
+        handleDateChange() {
+            this.storeDate(this.selectedDate);
+        },
+        getZauiPing() {
             ZauiDataService.ping()
                 .then(response => {
                     this.zaui_object_data = response.data;
@@ -46,7 +55,6 @@ export default {
                     console.log(e);
                 });
         },
-
         testZauiMapping() {
             ZauiDataService.checkZauiMapping(new Date(this.selectedDate))
                 .then(response => {
@@ -75,8 +83,7 @@ export default {
                     console.log(e);
                 });
         },
-
-        getBookingByDay(){
+        getBookingByDay() {
             ZauiDataService.getBookingByDay(new Date(this.selectedDate))
                 .then(response => {
                     this.zaui_object_data = response.data;
@@ -85,7 +92,6 @@ export default {
                     console.log(e);
                 });
         },
-
         getManifestByDate() {
             ZauiDataService.getManifestByDay(new Date(this.selectedDate))
                 .then(response => {
@@ -97,7 +103,6 @@ export default {
                     this.zaui_object_data = "Error: Failed to get the manifest data.";
                 });
         },
-
         getGuestProfile() {
             const booking = {
                 bookingNumber: "16322",
@@ -114,7 +119,6 @@ export default {
                     console.error("Error getting guest profile:", error);
                 });
         },
-
         getBookingByNumber() {
             ZauiDataService.getBookingByNumber(this.bookingNumber)
                 .then(response => {
@@ -124,12 +128,15 @@ export default {
                     console.log(e);
                 });
         }
+    },
+    mounted() {
+        this.storeDate(this.selectedDate);
     }
 }
 </script>
 
 <style type="css">
-#zaui_data_box{
+#zaui_data_box {
     width: 60%;
     margin: auto;
     margin-top: 30px;

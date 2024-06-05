@@ -4,7 +4,7 @@
       <h1>Organize Shuttles</h1>
       <div class="date-picker-container">
         <label for="selectedDate">Select Date:</label>
-        <input type="date" id="selectedDate" v-model="selectedDate" @change="fetchTripsByDate" class="date-picker" />
+        <input type="date" id="selectedDate" v-model="selectedDate" @change="handleDateChange" class="date-picker" />
       </div>
     </div>
     <div v-if="trips.length === 0" class="no-trips-message">
@@ -44,6 +44,15 @@
               <label for="dropoffLocation">Dropoff Location:</label>
               <input type="text" v-model="client.dropoffLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
             </div>
+            <div class="form-group-inline training-status">
+              <label for="trainingStatus">Training Status:</label>
+              <div v-if="client.person && hasTrainingType1(client.person.trainings)">
+                <div class="training-date" @dblclick="editTrainingDate(client.person)">{{ getTrainingDate(client.person.trainings) }}</div>
+              </div>
+              <div v-else>
+                <input type="checkbox" id="trainingCheckbox" @change="addTraining(client.person)" />
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -58,12 +67,22 @@ import ShuttleDataService from '@/services/ShuttleDataService';
 export default {
   data() {
     return {
-      selectedDate: new Date().toISOString().split('T')[0],
+      selectedDate: this.getStoredDate() || new Date().toISOString().split('T')[0],
       trips: [],
       shuttles: [],
     };
   },
   methods: {
+    getStoredDate() {
+      return sessionStorage.getItem('selectedDate');
+    },
+    storeDate(date) {
+      sessionStorage.setItem('selectedDate', date);
+    },
+    handleDateChange() {
+      this.storeDate(this.selectedDate);
+      this.fetchTripsByDate();
+    },
     async fetchTripsByDate() {
       try {
         const response = await TripDataService.fetchTripsByDate(this.selectedDate);
@@ -131,6 +150,52 @@ export default {
           console.error("Error updating client shuttle details:", error);
         });
     },
+    hasTrainingType1(trainings) {
+      return trainings.some(training => training.trainingtypeid === 1);
+    },
+    getTrainingDate(trainings) {
+      const training = trainings.find(training => training.trainingtypeid === 1);
+      return training ? training.trainingdate : null;
+    },
+    async addTraining(person) {
+      try {
+        const response = await TripDataService.updateTraining({
+          personid: person.id,
+          trainingtypeid: 1,
+          trainingdate: this.selectedDate
+        });
+
+        if (response.status === 201) {
+          console.log("Training added successfully:", response.data);
+          person.trainings.push({
+            trainingtypeid: 1,
+            trainingname: 'Avalanche Safety and Helicopter safety training',
+            trainingdate: this.selectedDate
+          });
+        }
+      } catch (error) {
+        console.error("Error adding training status:", error);
+      }
+    },
+    async editTrainingDate(person) {
+      try {
+        const response = await TripDataService.updateTraining({
+          personid: person.id,
+          trainingtypeid: 1,
+          trainingdate: this.selectedDate
+        });
+
+        if (response.status === 200) {
+          console.log("Training date updated successfully:", response.data);
+          const training = person.trainings.find(training => training.trainingtypeid === 1);
+          if (training) {
+            training.trainingdate = this.selectedDate;
+          }
+        }
+      } catch (error) {
+        console.error("Error updating training date:", error);
+      }
+    },
     sortedGroups(groups) {
       return groups.slice().sort((a, b) => a.groupid - b.groupid);
     },
@@ -195,7 +260,7 @@ export default {
 
 .client-row {
   display: grid;
-  grid-template-columns: 200px repeat(5, 1fr);
+  grid-template-columns: 200px repeat(6, 1fr);
   align-items: center;
   gap: 10px;
   margin-bottom: 10px;
@@ -219,5 +284,17 @@ export default {
   width: 100%;
   padding: 4px;
   box-sizing: border-box;
+}
+
+.training-date {
+  background-color: lightgreen;
+  padding: 5px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.training-status {
+  display: flex;
+  align-items: center;
 }
 </style>

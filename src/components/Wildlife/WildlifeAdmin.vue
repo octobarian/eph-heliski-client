@@ -7,7 +7,7 @@
             <h2>View Wildlife Sightings</h2>
             <div class="date-picker-container">
                 <label for="selectedDate">Select Date:</label>
-                <input type="date" id="selectedDate" v-model="selectedDate" @change="fetchTripsByDate" class="date-picker" />
+                <input type="date" id="selectedDate" v-model="selectedDate" @change="handleDateChange" class="date-picker" />
             </div>
             <div v-if="trips.length === 0" class="no-trips-message">
                 <p>No trips found for the selected date.</p>
@@ -90,8 +90,9 @@ export default {
             trips: [],
             zones: [],
             runs: [],
-            selectedDate: new Date().toISOString().split('T')[0],
+            selectedDate: this.getStoredDate() || new Date().toISOString().split('T')[0],
             speciesList: [
+                'Snowmobile',
                 'Grizzly Bear',
                 'Black Bear',
                 'Moose',
@@ -116,6 +117,16 @@ export default {
         },
     },
     methods: {
+        getStoredDate() {
+            return sessionStorage.getItem('selectedDate');
+        },
+        storeDate(date) {
+            sessionStorage.setItem('selectedDate', date);
+        },
+        handleDateChange() {
+            this.storeDate(this.selectedDate);
+            this.fetchTripsByDate();
+        },
         fetchTripsByDate() {
             TripDataService.fetchTripsByDate(this.selectedDate)
                 .then(response => {

@@ -7,7 +7,7 @@
       <h2>Assign Runs to Trip Groups</h2>
       <div class="date-picker-container">
         <label for="selectedDate">Select Date:</label>
-        <input type="date" id="selectedDate" v-model="selectedDate" @change="fetchTripsByDate" class="date-picker" />
+        <input type="date" id="selectedDate" v-model="selectedDate" @change="handleDateChange" class="date-picker" />
       </div>
       <div v-if="trips.length === 0" class="no-trips-message">
         <p>No trips found for the selected date.</p>
@@ -201,7 +201,7 @@ export default {
       runs: [],
       trips: [],
       tripRuns: [],
-      selectedDate: new Date().toISOString().split('T')[0],
+      selectedDate: this.getStoredDate() || new Date().toISOString().split('T')[0],
       newZoneName: "",
       newZoneDescription: "",
       newRunName: "",
@@ -226,6 +226,16 @@ export default {
     }
   },
   methods: {
+    getStoredDate() {
+      return sessionStorage.getItem('selectedDate');
+    },
+    storeDate(date) {
+      sessionStorage.setItem('selectedDate', date);
+    },
+    handleDateChange() {
+      this.storeDate(this.selectedDate);
+      this.fetchTripsByDate();
+    },
     toggleZonesCollapse() {
       this.isZonesCollapsed = !this.isZonesCollapsed;
     },

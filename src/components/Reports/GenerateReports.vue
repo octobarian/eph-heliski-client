@@ -5,7 +5,7 @@
       <!-- Date Selector -->
       <div class="form-group">
         <label for="reportDate">Report Date</label>
-        <input type="date" id="reportDate" class="form-control" v-model="selectedDate">
+        <input type="date" id="reportDate" class="form-control" v-model="selectedDate" @change="handleDateChange">
       </div>
       <!-- Report Type Selector -->
       <div class="form-group">
@@ -27,7 +27,6 @@
   </div>
 </template>
 
-
 <script>
 import ReportsDataService from '@/services/ReportsDataService.js';
 //individual reports
@@ -43,16 +42,26 @@ export default {
     return {
       selectedReportTypes: [],
       selectAll: false,
-      selectedDate: new Date().toISOString().substr(0, 10),
+      selectedDate: this.getStoredDate() || new Date().toISOString().substr(0, 10),
       reportTypes: [
         'Trips Overview',
         'Medical Report',
         'Lunch Report',
-        'Shuttle Report' 
+        'Shuttle Report'
       ],
     };
   },
   methods: {
+    getStoredDate() {
+      return sessionStorage.getItem('selectedDate');
+    },
+    storeDate(date) {
+      sessionStorage.setItem('selectedDate', date);
+    },
+    handleDateChange() {
+      this.storeDate(this.selectedDate);
+      // Any other operations that need to happen when date changes
+    },
     generateReports() {
       this.selectedReportTypes.forEach(reportType => {
         switch (reportType) {
@@ -66,7 +75,7 @@ export default {
             this.generateDateLunchReport();
             break;
           case 'Shuttle Report':
-            this.generateDateShuttleReport(); 
+            this.generateDateShuttleReport();
             break;
         }
       });
@@ -154,97 +163,95 @@ export default {
   },
 };
 </script>
-  
-  
-  <style scoped>
-  .reports-page {
-    margin: 20px;
-  }
-  
-  .reports-title {
-    text-align: center;
-    margin-bottom: 20px; /* Ensure there's space between the title and the box */
-  }
-  
-  .report-generation-box {
-    display: flex;
-    justify-content: flex-end; /* Align to the right side */
-    align-items: center; /* Align items vertically */
-    padding: 20px;
-    background-color: #f8f9fa; /* Light grey background */
-    border-radius: 5px; /* Rounded corners */
-  }
-  
+
+<style scoped>
+.reports-page {
+  margin: 20px;
+}
+
+.reports-title {
+  text-align: center;
+  margin-bottom: 20px; /* Ensure there's space between the title and the box */
+}
+
+.report-generation-box {
+  display: flex;
+  justify-content: flex-end; /* Align to the right side */
+  align-items: center; /* Align items vertically */
+  padding: 20px;
+  background-color: #f8f9fa; /* Light grey background */
+  border-radius: 5px; /* Rounded corners */
+}
+
 .form-group {
   display: flex;
   flex-direction: column; /* Stack the children vertically */
   align-items: flex-start; /* Align items to the start of the flex container */
   margin-right: 10px; /* Space between the dropdown and button */
 }
-  
-  #reportType {
-    width: 300px; /* Width for dropdown */
-    padding: 0.375rem 0.75rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border: 1px solid #ced4da;
-    border-radius: 0.25rem;
-    margin-bottom: 0; /* Remove any default margin-bottom */
-  }
-  
-  .btn-generate-report {
-    padding: 0.375rem 1rem; /* Adjust padding */
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    color: #fff;
-    background-color: var(--primary-text-eph-color); /* Use primary color */
-    border: none;
-    cursor: pointer;
-  }
-  
-  .previous-reports {
-    margin-top: 20px; /* Space between sections */
-    background-color: #fff; /* Change if needed */
-  }
-  
-  .table {
-    width: 100%;
-    margin-bottom: 1rem;
-    background-color: transparent;
-  }
-  
-  .table th,
-  .table td {
-    padding: 0.75rem;
-    border-top: 1px solid #eceeef;
-  }
-  
-  .table thead th {
-    border-bottom: 2px solid #eceeef;
-  }
-  
-  .table tbody + tbody {
-    border-top: 2px solid #eceeef;
-  }
-  
-  .btn-download {
-    color: #fff;
-    background-color: #6c757d;
-    border-color: #6c757d;
-    cursor: pointer;
-  }
 
-  .btn-test-report {
-    padding: 0.375rem 1rem;
-    font-size: 1rem;
-    line-height: 1.5;
-    border-radius: 0.25rem;
-    color: #fff;
-    background-color: #28a745; /* Bootstrap success color for test button */
-    border: none;
-    cursor: pointer;
-    margin-top: 10px; /* Add some margin at the top of the button */
-  }
-  </style>
-  
+#reportType {
+  width: 300px; /* Width for dropdown */
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border: 1px solid #ced4da;
+  border-radius: 0.25rem;
+  margin-bottom: 0; /* Remove any default margin-bottom */
+}
+
+.btn-generate-report {
+  padding: 0.375rem 1rem; /* Adjust padding */
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  color: #fff;
+  background-color: var(--primary-text-eph-color); /* Use primary color */
+  border: none;
+  cursor: pointer;
+}
+
+.previous-reports {
+  margin-top: 20px; /* Space between sections */
+  background-color: #fff; /* Change if needed */
+}
+
+.table {
+  width: 100%;
+  margin-bottom: 1rem;
+  background-color: transparent;
+}
+
+.table th,
+.table td {
+  padding: 0.75rem;
+  border-top: 1px solid #eceeef;
+}
+
+.table thead th {
+  border-bottom: 2px solid #eceeef;
+}
+
+.table tbody + tbody {
+  border-top: 2px solid #eceeef;
+}
+
+.btn-download {
+  color: #fff;
+  background-color: #6c757d;
+  border-color: #6c757d;
+  cursor: pointer;
+}
+
+.btn-test-report {
+  padding: 0.375rem 1rem;
+  font-size: 1rem;
+  line-height: 1.5;
+  border-radius: 0.25rem;
+  color: #fff;
+  background-color: #28a745; /* Bootstrap success color for test button */
+  border: none;
+  cursor: pointer;
+  margin-top: 10px; /* Add some margin at the top of the button */
+}
+</style>
