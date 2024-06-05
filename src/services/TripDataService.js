@@ -83,6 +83,10 @@ class TripDataService {
     };
     return http.post('/trips/removereservation', data);
   }
+
+  updateTraining(data) {
+    return http.post("/trips/updateTraining", data);
+  }
   
 }
 

@@ -5,7 +5,7 @@
         <h1>Admin Dashboard</h1>
         <div class="date-picker-container">
           <label for="selectedDate">Selected Date:</label>
-          <input type="date" id="selectedDate" v-model="selectedDate" @change="fetchTripsByDate" class="date-picker" />
+          <input type="date" id="selectedDate" v-model="selectedDate" @change="handleDateChange" class="date-picker" />
         </div>
       </div>
       <div class="row trips-container">
@@ -55,7 +55,7 @@ export default {
   },
   data() {
     return {
-      selectedDate: new Date().toISOString().split('T')[0], // Set today's date as default
+      selectedDate: this.getStoredDate() || new Date().toISOString().split('T')[0], // Set today's date as default
       trips: [],
       pilots: [],
       guides: [],
@@ -65,11 +65,20 @@ export default {
     };
   },
   methods: {
+    getStoredDate() {
+      return sessionStorage.getItem('selectedDate');
+    },
+    storeDate(date) {
+      sessionStorage.setItem('selectedDate', date);
+    },
+    handleDateChange() {
+      this.storeDate(this.selectedDate);
+      this.fetchTripsByDate();
+    },
     fetchTripsByDate() {
       TripDataService.fetchTripsByDate(this.selectedDate)
         .then(response => {
           this.trips = response.data.sort((a, b) => a.tripid - b.tripid); // Sort by tripid
-
         })
         .catch(error => {
           console.error("Error fetching trips:", error);
