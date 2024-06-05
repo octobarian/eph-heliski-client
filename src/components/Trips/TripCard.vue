@@ -1,6 +1,6 @@
 <template>
   <div class="trip-card card">
-    <div class="card-header">
+    <div class="card-header" :style="tripTypeStyle">
       <div class="row">
         <div>
           <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
@@ -173,36 +173,43 @@ export default {
     },
     tripTypeStyle() {
       let borderColor = '';
+      let backgroundColor = '';
 
       switch (this.editableTripData.triptype) {
         case 'Private':
           borderColor = 'var(--private-event-color)';
+          backgroundColor = 'rgba(247, 191, 47, 0.3)'; // Equivalent rgba for --private-event-color
           break;
         case 'Lodge':
           borderColor = 'var(--lodge-event-color)';
+          backgroundColor = 'rgba(237, 98, 64, 0.3)'; // Equivalent rgba for --lodge-event-color
           break;
         case 'Day Heli':
           borderColor = 'var(--day-event-color)';
+          backgroundColor = 'rgba(109, 123, 156, 0.3)'; // Equivalent rgba for --day-event-color
           break;
         case 'Media':
           borderColor = 'var(--minor-media-event-color)';
+          backgroundColor = 'rgba(95, 184, 100, 0.3)'; // Equivalent rgba for --minor-media-event-color
           break;
         default:
           borderColor = '#ccc'; // Default border color
+          backgroundColor = 'rgba(204, 204, 204, 0.3)'; // Default background color with opacity
       }
 
       return {
-        border: `2px solid ${borderColor}`
+        border: `2px solid ${borderColor}`,
+        backgroundColor: `${backgroundColor}`,
       };
     }
   },
   methods: {
     //TODO: Placeholder functions till program deals with it
     createNewGroup() {
-      console.log('Creating a new group for trip ID:', this.tripData.tripId);
+      //console.log('Creating a new group for trip ID:', this.tripData.tripId);
       TripDataService.createGroup(this.tripData.tripId)
           .then(response => {
-              console.log('New group created successfully:', response.data);
+              //console.log('New group created successfully:', response.data);
               // Add the new group to the tripData.groups array to update the UI
               this.tripData.groups = [...this.tripData.groups, response.data];
               this.$emit('clientRemoved');
@@ -220,7 +227,7 @@ export default {
         // Make sure you have a service to handle API requests
         TripDataService.deleteGroup(groupId)
           .then(() => {
-            console.log('Group deleted successfully');
+            //console.log('Group deleted successfully');
             // Remove the deleted group from the tripData.groups array
             this.tripData.groups = this.tripData.groups.filter(group => group.groupid !== groupId);
             this.$emit('clientRemoved');
@@ -232,16 +239,17 @@ export default {
           });
       } else {
         // The user clicked "No" or closed the confirmation dialog
-        console.log('Group deletion cancelled.');
+        // console.log('Group deletion cancelled.');
       }
     },
+    // eslint-disable-next-line no-unused-vars
     handleRemoveGuide(guide) {
       // Implement the logic to remove the guide from the group
-      console.log('Removing guide:', guide);
+      //console.log('Removing guide:', guide);
       // Update your state or make an API call here
     },
     handleRemoveClient(clientInfo) {
-      console.log(clientInfo); // Log to verify structure
+      //console.log(clientInfo); // Log to verify structure
       // Change clientId to tripClientId
       TripDataService.removeClientFromGroup(clientInfo.groupId, clientInfo.tripClientId)
         .then(() => {
@@ -354,11 +362,12 @@ export default {
       };
 
       TripDataService.update(this.tripData.tripId, updatedTripData)
+      // eslint-disable-next-line no-unused-vars
         .then(response => {
           this.tripData.helicopterId = this.editableTripData.helicopterId;
           this.tripData.pilotId = this.editableTripData.pilotId;
           this.tripData.triptype = this.editableTripData.triptype;
-          console.log(response);
+          //console.log(response);
         })
         .catch(error => {
           console.error("Error updating trip:", error);
@@ -367,16 +376,11 @@ export default {
     updateGroupDate({ groupId, newEndDate }) {
         // Now including tripId in the data sent to the server
         const tripId = this.tripData.tripId;
-        console.log('Update' +tripId+' gid'+groupId+' NED'+newEndDate);
         // Adjusting the call to include tripId as part of the object sent
         TripDataService.updateGroupDate({ groupId, tripId, newEndDate })
-            .then(response => {
-                // Handle success - you may want to refresh the group data or emit an event
-                console.log("Group end date updated successfully:", response);
-                // Consider emitting an event or directly updating the local data to reflect the change
+        // eslint-disable-next-line no-unused-vars
+            .then(response => { 
                 this.$emit('groupDateUpdated', { groupId, newEndDate });
-                // Optionally, trigger a refresh of the trip data if the component structure allows for it
-                // this.fetchTripData(tripId); // Assuming such a method exists
             })
             .catch(error => {
                 // Handle error

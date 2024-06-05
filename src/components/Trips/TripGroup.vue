@@ -137,7 +137,7 @@
         this.$emit('removeClient', { tripClientId: client.tripClientId, groupId: this.groupId });
       },
       emitDateChange() {
-        this.$emit('updateEndDate', { groupId: this.groupId, newEndDate: this.continueTillDate });
+        this.$emit('updateEndDate', { groupId: this.groupId, newEndDate: this.groupEndDate });
       },
       assignBeacon(beaconId, tripClientId) {
         EquipmentDataService.assignBeaconToTripClient(beaconId, tripClientId)
