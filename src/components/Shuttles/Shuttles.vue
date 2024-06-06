@@ -86,7 +86,13 @@ export default {
     async fetchTripsByDate() {
       try {
         const response = await TripDataService.fetchTripsByDate(this.selectedDate);
+        // Sort trips by tripId
         this.trips = response.data.sort((a, b) => a.tripId - b.tripId);
+
+        // Sort trip groups by groupId within each trip
+        this.trips.forEach(trip => {
+          trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
+        });
 
         const tripIds = this.trips.map(trip => trip.tripId);
         const clientIds = this.trips.flatMap(trip => trip.groups.flatMap(group => group.clients.map(client => client.tripClientId)));

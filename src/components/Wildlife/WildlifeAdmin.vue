@@ -130,25 +130,32 @@ export default {
         fetchTripsByDate() {
             TripDataService.fetchTripsByDate(this.selectedDate)
                 .then(response => {
-                    this.trips = response.data;
-                    this.trips.forEach(trip => {
-                        this.$set(trip, 'isCollapsed', true);
-                        trip.groups.forEach(group => {
-                            this.$set(group, 'newSighting', {
-                                zoneid: '',
-                                runid: '',
-                                species: '',
-                                type: '',
-                                comments: '',
-                                spottedTime: ''
-                            });
-                            this.fetchWildlifeForGroup(this.selectedDate, group);
-                        });
-                    });
-                })
-                .catch(e => {
-                    console.log(e);
+                // Sort trips by tripId
+                this.trips = response.data.sort((a, b) => a.tripId - b.tripId);
+
+                // Sort trip groups by groupid within each trip
+                this.trips.forEach(trip => {
+                    trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
                 });
+
+                this.trips.forEach(trip => {
+                    this.$set(trip, 'isCollapsed', true);
+                    trip.groups.forEach(group => {
+                    this.$set(group, 'newSighting', {
+                        zoneid: '',
+                        runid: '',
+                        species: '',
+                        type: '',
+                        comments: '',
+                        spottedTime: ''
+                    });
+                    this.fetchWildlifeForGroup(this.selectedDate, group);
+                    });
+                });
+            })
+            .catch(e => {
+            console.log(e);
+            });
         },
         fetchWildlifeForGroup(date, group) {
             WildlifeDataService.getByDateAndTripGroup(date, group.groupid)

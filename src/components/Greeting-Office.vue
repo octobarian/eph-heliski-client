@@ -78,13 +78,17 @@ export default {
     fetchTripsByDate() {
       TripDataService.fetchTripsByDate(this.selectedDate)
         .then(response => {
-          this.trips = response.data.sort((a, b) => a.tripid - b.tripid); // Sort by tripid
+          this.trips = response.data.map(trip => {
+            console.log(trip);
+            trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
+            return trip;
+          }).sort((a, b) => a.tripid - b.tripid); // Sort by tripid
         })
         .catch(error => {
           console.error("Error fetching trips:", error);
           this.trips = []; // Reset trips on error
         });
-        this.fetchUnassignedReservations();
+      this.fetchUnassignedReservations();
     },
     fetchUnassignedReservations() {
       // console.log("Finding Reservations for "+this.selectedDate);
