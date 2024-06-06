@@ -263,7 +263,14 @@ export default {
     fetchTripsByDate() {
       TripDataService.fetchTripsByDate(this.selectedDate)
         .then(response => {
-          this.trips = response.data;
+          // Sort trips by tripId
+          this.trips = response.data.sort((a, b) => a.tripId - b.tripId);
+
+          // Sort trip groups by groupid within each trip
+          this.trips.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
+          });
+
           this.fetchTripRuns(this.trips.map(trip => trip.tripId));
           this.trips.forEach(trip => {
             trip.groups.forEach(group => {

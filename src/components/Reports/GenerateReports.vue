@@ -88,18 +88,35 @@ export default {
       ReportsDataService.getDailyTripsReportData(this.selectedDate)
         .then(response => {
           const tripsData = response.data;
-          generateDailyTripsReport(tripsData); // Pass the fetched data to the report generation function
+
+          // Sort trips by tripId (assuming `tripId` corresponds to `heliIndex`)
+          const sortedTripsData = tripsData.sort((a, b) => a.heliIndex - b.heliIndex);
+
+          // Sort trip groups by groupId within each trip
+          sortedTripsData.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
+          });
+
+          generateDailyTripsReport(sortedTripsData); // Pass the sorted data to the report generation function
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
         });
     },
-    
+
     generateDateLunchReport() {
       ReportsDataService.getLunchReportData(this.selectedDate)
         .then(response => {
           const lunchData = response.data;
-          generateLunchReport(lunchData); // Pass the fetched data to the report generation function
+
+          // Sort trips by heliIndex (assuming heliIndex corresponds to tripId)
+          const sortedLunchData = lunchData.sort((a, b) => a.heliIndex - b.heliIndex);
+
+          // Sort trip groups by groupId within each trip
+          sortedLunchData.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
+          });
+          generateLunchReport(sortedLunchData); // Pass the sorted data to the report generation function
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
@@ -110,7 +127,15 @@ export default {
       ReportsDataService.getMedicalReportData(this.selectedDate)
         .then(response => {
           const medicalData = response.data;
-          generateMedicalReport(medicalData); // Pass the fetched data to the report generation function
+
+          // Sort trips by heliIndex (assuming heliIndex corresponds to tripId)
+          const sortedMedicalData = medicalData.sort((a, b) => a.heliIndex - b.heliIndex);
+
+          // Sort trip groups by groupId within each trip
+          sortedMedicalData.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
+          });
+          generateMedicalReport(sortedMedicalData); // Pass the sorted data to the report generation function
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
@@ -121,7 +146,16 @@ export default {
       ReportsDataService.getDailyShuttleReportData(this.selectedDate)
         .then(response => {
           const shuttleData = response.data;
-          generateShuttleReport(shuttleData); // Pass the fetched data to the report generation function
+
+          // Sort shuttle data by heliIndex and then by groupIndex
+          const sortedShuttleData = shuttleData.sort((a, b) => {
+            if (a.heliIndex === b.heliIndex) {
+              return a.groupIndex - b.groupIndex;
+            }
+            return a.heliIndex - b.heliIndex;
+          });
+
+          generateShuttleReport(sortedShuttleData); // Pass the sorted data to the report generation function
         })
         .catch(error => {
           console.error("Error fetching shuttle data for report:", error);
