@@ -40,11 +40,11 @@
 
       <div class="row">
         <div class="select-group">
-          <label for="UAtrip-selector">Trip:</label>
+          <label for="UAtrip-selector">Heli:</label>
           <select name="UAtrip-selector" v-model="selectedTrip" class="UAtrip-selector form-select me-2" @change="fetchGroupsForTrip">
-            <option disabled value="">Select Trip</option>
+            <option disabled value="">Select Heli</option>
             <option v-for="(trip, index) in sortedTrips" :key="trip.tripId" :value="trip.tripId">
-              Trip #{{ index + 1 }}
+              Heli #{{ index + 1 }}
             </option>
           </select>
         </div>

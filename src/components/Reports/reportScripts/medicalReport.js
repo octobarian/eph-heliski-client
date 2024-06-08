@@ -1,11 +1,13 @@
 import { jsPDF } from "jspdf";
 
-export default function generateMedicalReport(data) {
+export default function generateMedicalReport(data, date) {
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
     format: "a4",
   });
+
+  const reportDate = date;
 
   let yPos = 10; // Set initial Y position
 
@@ -15,14 +17,13 @@ export default function generateMedicalReport(data) {
 
   // Define headers and their respective starting positions and widths
   const headerConfig = [
-    { header: "Last Name", startPos: 10, width: 40 },
-    { header: "First Name", startPos: 50, width: 40 },
-    { header: "Weight", startPos: 90, width: 21 }, // Width reduced by 30%
-    { header: "Medical Con", startPos: 111, width: 44 }, // Width adjusted to prevent cutoff
-    { header: "Diet Restrict", startPos: 155, width: 35 }, // Width adjusted
-    { header: "Allergy RX", startPos: 190, width: 25 }, // Width adjusted
-    { header: "Severity", startPos: 215, width: 25 }, // Width adjusted
-    { header: "Prescriptions", startPos: 240, width: 35 }, // Width adjusted to prevent cutoff
+    { header: "Last Name", startPos: 10, width: 50 },
+    { header: "First Name", startPos: 60, width: 50 },
+    { header: "Medical Con", startPos: 110, width: 40 },
+    { header: "Diet Restrict", startPos: 150, width: 40 },
+    { header: "Allergy RX", startPos: 190, width: 40 },
+    { header: "Severity", startPos: 230, width: 30 },
+    { header: "Prescriptions", startPos: 260, width: 40 }
   ];
 
   // Set font size for headers
@@ -45,8 +46,9 @@ export default function generateMedicalReport(data) {
     doc.setFontSize(14);
     doc.setTextColor(0, 0, 0); // Set text color to black
     doc.text(`Heli #${helicopter.heliIndex}: ${helicopter.helicopterId}`, 10, yPos);
+    doc.text(`Date: ${reportDate}`, 160, yPos); //Date of the report
     yPos += 10;
-    doc.setFillColor(200, 200, 200); // Line 48: Change the RGB color to light grey
+    doc.setFillColor(200, 200, 200); //Change the RGB color to light grey
 
     helicopter.groups.forEach(group => {
       yPos = checkPageOverflow(yPos);
@@ -76,15 +78,11 @@ export default function generateMedicalReport(data) {
           switch (col.header) {
             case "Last Name":
               doc.setFontSize(12);
-              text = client.lastName || "N/A";
+              text = client.lastName || "";
               break;
             case "First Name":
               doc.setFontSize(12);
-              text = client.firstName || "N/A";
-              break;
-            case "Weight":
-              doc.setFontSize(12);
-              text = client.weight ? `${client.weight}` : "N/A";
+              text = client.firstName || "";
               break;
             case "Medical Con":
             case "Diet Restrict":
@@ -92,11 +90,11 @@ export default function generateMedicalReport(data) {
             case "Severity":
             case "Prescriptions":
               doc.setFontSize(9); // Font size reduced for custom fields
-              text = client.customFields[col.header] ? client.customFields[col.header].trim() : "N/A";
+              text = client.customFields[col.header] ? client.customFields[col.header].trim() : "";
               break;
             default:
               doc.setFontSize(12); // Reset to default font size for other fields
-              text = "N/A";
+              text = "";
           }
           doc.text(text, col.startPos, yPos, { maxWidth: col.width - 2 }); // Adjust text within column width
           var fieldLength = text.split(/\r\n|\r|\n/).length; // Count the number of lines
@@ -108,9 +106,9 @@ export default function generateMedicalReport(data) {
           } else {
             // If no newlines, check if text length is greater than 20
             if (text.length > 20) {
-              extraSpace = 2; // If text length is greater than 20, set extraSpace to 2
+              extraSpace = 3; // If text length is greater than 20, set extraSpace to 2
             } else if (text.length > 40) {
-              extraSpace = 4;
+              extraSpace = 5;
             } else {
               extraSpace = 0; // Otherwise, no extra space needed
             }
@@ -125,7 +123,7 @@ export default function generateMedicalReport(data) {
     });
   });
 
-  const today = new Date();
+  const today = new Date(date);
   const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
   doc.save(`daily-medical-report-${dateString}.pdf`);
 }
