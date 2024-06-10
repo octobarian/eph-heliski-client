@@ -1,6 +1,6 @@
 import { jsPDF } from "jspdf";
 
-export default function generateLunchReport(data) {
+export default function generateRentalReport(data) {
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
@@ -9,13 +9,10 @@ export default function generateLunchReport(data) {
 
   let yPos = 10; // Set initial Y position
   const primaryColor = '#c8d701'; // Set primary color
-  const blueColor = '#596787';
-  const redColor = '#f04e26';
-  const blackColor = '#000000';
 
   doc.setFontSize(18);
   doc.setTextColor(primaryColor); // Set title color to primary color
-  doc.text("Group Lunch Report", 148, yPos, { align: "center" });
+  doc.text("Rental Report", 148, yPos, { align: "center" });
   yPos += 10; // Adjust position after the title
 
   const checkPageOverflow = (yPosition) => {
@@ -30,9 +27,9 @@ export default function generateLunchReport(data) {
   const headers = [
     { title: "Last Name", x: 10, width: 45 },
     { title: "First Name", x: 55, width: 45 },
-    { title: "Diet?", x: 100, width: 20 }, // Shortened title and adjusted width
-    { title: "Cannot Eat", x: 120, width: 80 },
-    { title: "Severity", x: 200, width: 40 },
+    { title: "Rentals", x: 100, width: 50 },
+    { title: "Preferred Ski/Board", x: 150, width: 80 },
+    { title: "Size", x: 230, width: 40 },
   ];
 
   // Define a function to draw headers
@@ -75,28 +72,13 @@ export default function generateLunchReport(data) {
         yPos = checkPageOverflow(yPos);
 
         // Set text color for client names to primary color
-        doc.setTextColor(blueColor);
+        doc.setTextColor(0, 0, 0);
         doc.setFontSize(10);
         doc.text(client.lastName || "N/A", headers[0].x, yPos);
         doc.text(client.firstName || "N/A", headers[1].x, yPos);
-        
-        // Reset text color to black for remaining details
-        doc.setTextColor(blackColor);
-        doc.setFontSize(10);
-        // Dietary Restrictions checkbox
-        if (client.dietaryRestrictions) {
-          doc.setTextColor(redColor);
-          doc.text("Yes", headers[2].x + (headers[2].width / 2), yPos, { align: "center" });
-        } else {
-          doc.text("No", headers[2].x + (headers[2].width / 2), yPos, { align: "center" });
-        }
-
-        // Remaining client details
-        const cannotEatLines = splitTextToLines(client.cannotEat || "N/A", 45);
-        cannotEatLines.forEach((line, index) => {
-          doc.text(line, headers[3].x, yPos + (index * 5));
-        });
-        doc.text(client.severity || "N/A", headers[4].x, yPos);
+        doc.text(client.rentals || "N/A", headers[2].x, yPos);
+        doc.text(client.preferredSkiBoard || "N/A", headers[3].x, yPos);
+        doc.text(client.size || "N/A", headers[4].x, yPos);
 
         yPos += 10; // Increment yPos for the next client
       });
@@ -104,45 +86,15 @@ export default function generateLunchReport(data) {
       yPos += (groupCount % 2 === 0) ? 20 : 10; 
     });
 
-    // Calculate and display total lunches
-    const totalGuestLunches = helicopter.groups.reduce((acc, group) => acc + group.clients.length, 0);
-    const totalGuideLunches = helicopter.groups.length;
-    const totalPilotLunches = 1;
-    const totalLunches = totalGuestLunches + totalGuideLunches + totalPilotLunches;
-
+    // Footer with total counts
     yPos = checkPageOverflow(yPos) + 5; // Ensure footer doesn't overlap with client details
     doc.setFontSize(12);
-    doc.setTextColor(blackColor); // Reset text color to black for footer
-    const footerText = `Heli #${helicopter.heliIndex} (Guest Lunches: ${totalGuestLunches}) + (1 Pilot Lunch) + (${totalGuideLunches} Guide Lunches) = Heli #${helicopter.heliIndex} (Total Lunches: ${totalLunches})`;
-    const footerParts = footerText.split(`Heli #${helicopter.heliIndex} (Total Lunches: `);
-    doc.text(footerParts[0], 10, yPos);
-    doc.setTextColor(redColor); // Set text color to red for total lunches
-    doc.text(`Heli #${helicopter.heliIndex} (Total Lunches: ${totalLunches})`, 10 + doc.getTextWidth(footerParts[0]), yPos);
-
-    yPos += 10; // Space after each helicopter's total
+    let totalGuestRentals = helicopter.groups.reduce((acc, group) => acc + group.totalRentals, 0);
+    doc.setTextColor(0, 0, 0); // Reset text color to black for footer
+    doc.text(`Heli #${helicopter.heliIndex} Guest Rentals: ${totalGuestRentals}`, 10, yPos);
   });
 
   const today = new Date();
   const dateString = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
-  doc.save(`daily-lunch-report-${dateString}.pdf`);
-}
-
-function splitTextToLines(text, maxLength) {
-  const words = text.split(' ');
-  const lines = [];
-  let currentLine = words[0];
-
-  words.slice(1).forEach((word) => {
-    if ((currentLine + ' ' + word).length > maxLength) {
-      lines.push(currentLine);
-      currentLine = word;
-    } else {
-      currentLine += ' ' + word;
-    }
-  });
-
-  // Push the last line
-  lines.push(currentLine);
-
-  return lines;
+  doc.save(`daily-rental-report-${dateString}.pdf`);
 }

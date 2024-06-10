@@ -34,7 +34,9 @@ import {
   generateDailyTripsReport,
   generateMedicalReport,
   generateLunchReport,
-  generateShuttleReport
+  generateShuttleReport,
+  generateGroupListReport,
+  generateRentalReport // Import the rental report function
 } from './reportScripts';
 
 export default {
@@ -47,7 +49,9 @@ export default {
         'Trips Overview',
         'Medical Report',
         'Lunch Report',
-        'Shuttle Report'
+        'Shuttle Report',
+        'Group List Report',
+        'Rental Report' // Add new report type
       ],
     };
   },
@@ -77,96 +81,109 @@ export default {
           case 'Shuttle Report':
             this.generateDateShuttleReport();
             break;
+          case 'Group List Report':
+            this.generateGroupListReport();
+            break;
+          case 'Rental Report': // Handle new report type
+            this.generateDateRentalReport();
+            break;
         }
       });
     },
     toggleSelectAll() {
       this.allSelected = !this.allSelected;
     },
-
     generateDateTripsOverview() {
       ReportsDataService.getDailyTripsReportData(this.selectedDate)
         .then(response => {
           const tripsData = response.data;
-
-          // Sort trips by tripId (assuming `tripId` corresponds to `heliIndex`)
           const sortedTripsData = tripsData.sort((a, b) => a.heliIndex - b.heliIndex);
-
-          // Sort trip groups by groupId within each trip
           sortedTripsData.forEach(trip => {
             trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
           });
-
-          generateDailyTripsReport(sortedTripsData); // Pass the sorted data to the report generation function
+          generateDailyTripsReport(sortedTripsData);
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
         });
     },
-
     generateDateLunchReport() {
       ReportsDataService.getLunchReportData(this.selectedDate)
         .then(response => {
           const lunchData = response.data;
-
-          // Sort trips by heliIndex (assuming heliIndex corresponds to tripId)
           const sortedLunchData = lunchData.sort((a, b) => a.heliIndex - b.heliIndex);
-
-          // Sort trip groups by groupId within each trip
           sortedLunchData.forEach(trip => {
             trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
           });
-          generateLunchReport(sortedLunchData); // Pass the sorted data to the report generation function
+          generateLunchReport(sortedLunchData);
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
         });
     },
-
     generateDateMedicalReport() {
       ReportsDataService.getMedicalReportData(this.selectedDate)
         .then(response => {
           const medicalData = response.data;
-
-          // Sort trips by heliIndex (assuming heliIndex corresponds to tripId)
           const sortedMedicalData = medicalData.sort((a, b) => a.heliIndex - b.heliIndex);
-
-          // Sort trip groups by groupId within each trip
           sortedMedicalData.forEach(trip => {
             trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
           });
-          generateMedicalReport(sortedMedicalData); // Pass the sorted data to the report generation function
+          generateMedicalReport(sortedMedicalData, this.selectedDate);
         })
         .catch(error => {
           console.error("Error fetching trips for report:", error);
         });
     },
-
     generateDateShuttleReport() {
       ReportsDataService.getDailyShuttleReportData(this.selectedDate)
         .then(response => {
           const shuttleData = response.data;
-
-          // Sort shuttle data by heliIndex and then by groupIndex
           const sortedShuttleData = shuttleData.sort((a, b) => {
             if (a.heliIndex === b.heliIndex) {
               return a.groupIndex - b.groupIndex;
             }
             return a.heliIndex - b.heliIndex;
           });
-
-          generateShuttleReport(sortedShuttleData); // Pass the sorted data to the report generation function
+          generateShuttleReport(sortedShuttleData);
         })
         .catch(error => {
           console.error("Error fetching shuttle data for report:", error);
         });
     },
-
+    generateGroupListReport() {
+      ReportsDataService.getGroupListReportData(this.selectedDate)
+        .then(response => {
+          const groupListData = response.data;
+          const sortedGroupListData = groupListData.sort((a, b) => a.heliIndex - b.heliIndex);
+          sortedGroupListData.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
+          });
+          generateGroupListReport(sortedGroupListData);
+        })
+        .catch(error => {
+          console.error("Error fetching group list data for report:", error);
+        });
+    },
+    generateDateRentalReport() {
+      ReportsDataService.getDailyRentalReportData(this.selectedDate)
+        .then(response => {
+          const rentalData = response.data;
+          const sortedRentalData = rentalData.sort((a, b) => a.heliIndex - b.heliIndex);
+          sortedRentalData.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
+          });
+          generateRentalReport(sortedRentalData);
+        })
+        .catch(error => {
+          console.error("Error fetching rental data for report:", error);
+        });
+    },
     testReport() {
       console.log("Testing Report");
       ReportsDataService.getLunchReportData(this.selectedDate)
         .then(response => {
-          console.log('Test Report Data:', response.data); // Log the response data to the console
+          console.log('Test Report Data:', response.data);
         })
         .catch(error => {
           console.error("Error during test fetch for report:", error);
@@ -174,12 +191,10 @@ export default {
     },
   },
   mounted() {
-    // Auto-select all reports when component mounts
     this.selectAll = true;
     this.toggleSelectAll();
   },
   computed: {
-    // Computed property to handle the select all functionality dynamically
     allSelected: {
       get() {
         return this.reportTypes.length && this.selectedReportTypes.length === this.reportTypes.length;
@@ -190,7 +205,6 @@ export default {
     }
   },
   watch: {
-    // Watcher to automatically update the selectAll based on selections
     selectedReportTypes(newValues) {
       this.selectAll = newValues.length === this.reportTypes.length;
     }
@@ -205,49 +219,49 @@ export default {
 
 .reports-title {
   text-align: center;
-  margin-bottom: 20px; /* Ensure there's space between the title and the box */
+  margin-bottom: 20px;
 }
 
 .report-generation-box {
   display: flex;
-  justify-content: flex-end; /* Align to the right side */
-  align-items: center; /* Align items vertically */
+  justify-content: flex-end;
+  align-items: center;
   padding: 20px;
-  background-color: #f8f9fa; /* Light grey background */
-  border-radius: 5px; /* Rounded corners */
+  background-color: #f8f9fa;
+  border-radius: 5px;
 }
 
 .form-group {
   display: flex;
-  flex-direction: column; /* Stack the children vertically */
-  align-items: flex-start; /* Align items to the start of the flex container */
-  margin-right: 10px; /* Space between the dropdown and button */
+  flex-direction: column;
+  align-items: flex-start;
+  margin-right: 10px;
 }
 
 #reportType {
-  width: 300px; /* Width for dropdown */
+  width: 300px;
   padding: 0.375rem 0.75rem;
   font-size: 1rem;
   line-height: 1.5;
   border: 1px solid #ced4da;
   border-radius: 0.25rem;
-  margin-bottom: 0; /* Remove any default margin-bottom */
+  margin-bottom: 0;
 }
 
 .btn-generate-report {
-  padding: 0.375rem 1rem; /* Adjust padding */
+  padding: 0.375rem 1rem;
   font-size: 1rem;
   line-height: 1.5;
   border-radius: 0.25rem;
   color: #fff;
-  background-color: var(--primary-text-eph-color); /* Use primary color */
+  background-color: var(--primary-text-eph-color);
   border: none;
   cursor: pointer;
 }
 
 .previous-reports {
-  margin-top: 20px; /* Space between sections */
-  background-color: #fff; /* Change if needed */
+  margin-top: 20px;
+  background-color: #fff;
 }
 
 .table {
@@ -283,9 +297,9 @@ export default {
   line-height: 1.5;
   border-radius: 0.25rem;
   color: #fff;
-  background-color: #28a745; /* Bootstrap success color for test button */
+  background-color: #28a745;
   border: none;
   cursor: pointer;
-  margin-top: 10px; /* Add some margin at the top of the button */
+  margin-top: 10px;
 }
 </style>
