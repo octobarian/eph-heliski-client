@@ -169,6 +169,7 @@ export default {
       ReportsDataService.getDailyRentalReportData(this.selectedDate)
         .then(response => {
           const rentalData = response.data;
+          console.log(rentalData); 
           const sortedRentalData = rentalData.sort((a, b) => a.heliIndex - b.heliIndex);
           sortedRentalData.forEach(trip => {
             trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);

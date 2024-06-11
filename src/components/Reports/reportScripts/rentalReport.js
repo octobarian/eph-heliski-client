@@ -15,6 +15,11 @@ export default function generateRentalReport(data) {
   doc.text("Rental Report", 148, yPos, { align: "center" });
   yPos += 10; // Adjust position after the title
 
+  //doc.text("Total Ski: "+ String(data.totalSki), 10, yPos);
+  //doc.text("Total Board: "+ String(group.groupboard), headers[2].x, yPos);
+  //doc.text("Total Rentals: "+ String(group.totalGroupRentals), headers[4].x, yPos);
+
+  yPos +=10;
   const checkPageOverflow = (yPosition) => {
     if (yPosition >= 200) {
       doc.addPage('landscape');
@@ -82,12 +87,17 @@ export default function generateRentalReport(data) {
 
         yPos += 10; // Increment yPos for the next client
       });
-
-      yPos += (groupCount % 2 === 0) ? 20 : 10; 
+      doc.setFont(undefined, "bold");
+      doc.text("Total Ski: "+ String(group.groupski), headers[0].x, yPos);
+      doc.text("Total Board: "+ String(group.groupboard), headers[2].x, yPos);
+      doc.text("Total Rentals: "+ String(group.totalGroupRentals), headers[4].x, yPos);
+      yPos += (groupCount % 2 === 0) ? 20 : 10;
+      doc.setFont(undefined, "normal");
     });
 
     // Footer with total counts
     yPos = checkPageOverflow(yPos) + 5; // Ensure footer doesn't overlap with client details
+    
     doc.setFontSize(12);
     let totalGuestRentals = helicopter.groups.reduce((acc, group) => acc + group.totalRentals, 0);
     doc.setTextColor(0, 0, 0); // Reset text color to black for footer
