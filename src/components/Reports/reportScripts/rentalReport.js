@@ -9,17 +9,39 @@ export default function generateRentalReport(data) {
 
   let yPos = 10; // Set initial Y position
   const primaryColor = '#c8d701'; // Set primary color
+  const redColor = '#f04e26'; // Set red color
+
+  // Get the totals from the last helicopter in the data array
+  const lastHelicopter = data[data.length - 1];
+  const totalRentalsDay = lastHelicopter.totalRental || 0;
+  const totalSkisDay = lastHelicopter.totalski || 0;
+  const totalBoardsDay = lastHelicopter.totalboard || 0;
 
   doc.setFontSize(18);
   doc.setTextColor(primaryColor); // Set title color to primary color
   doc.text("Rental Report", 148, yPos, { align: "center" });
   yPos += 10; // Adjust position after the title
 
-  //doc.text("Total Ski: "+ String(data.totalSki), 10, yPos);
-  //doc.text("Total Board: "+ String(group.groupboard), headers[2].x, yPos);
-  //doc.text("Total Rentals: "+ String(group.totalGroupRentals), headers[4].x, yPos);
+  // Add summary line at the top
+  doc.setFontSize(12);
+  doc.setTextColor(0, 0, 0); // Set text color to black for the summary line
+  doc.text("Total Rentals Day: ", 10, yPos);
+  doc.setTextColor(redColor);
+  doc.text(`${totalRentalsDay}`, 50, yPos);
 
-  yPos +=10;
+  doc.setTextColor(0, 0, 0);
+  doc.text("Total Skis Day: ", 70, yPos);
+  doc.setTextColor(redColor);
+  doc.text(`${totalSkisDay}`, 110, yPos);
+
+  doc.setTextColor(0, 0, 0);
+  doc.text("Total Boards Day: ", 130, yPos);
+  doc.setTextColor(redColor);
+  doc.text(`${totalBoardsDay}`, 170, yPos);
+  doc.setTextColor(0, 0, 0);
+
+  yPos += 10;
+
   const checkPageOverflow = (yPosition) => {
     if (yPosition >= 200) {
       doc.addPage('landscape');
@@ -82,24 +104,31 @@ export default function generateRentalReport(data) {
         doc.text(client.lastName || "N/A", headers[0].x, yPos);
         doc.text(client.firstName || "N/A", headers[1].x, yPos);
         doc.text(client.rentals || "N/A", headers[2].x, yPos);
-        doc.text(client.preferredSkiBoard || "N/A", headers[3].x, yPos);
+
+        const preferredSkiBoardLines = doc.splitTextToSize(client.preferredSkiBoard || "N/A", headers[3].width);
+        preferredSkiBoardLines.forEach((line, index) => {
+          doc.text(line, headers[3].x, yPos + (index * 5));
+        });
+
         doc.text(client.size || "N/A", headers[4].x, yPos);
 
-        yPos += 10; // Increment yPos for the next client
+        yPos += (preferredSkiBoardLines.length * 5) > 10 ? (preferredSkiBoardLines.length * 5) : 10; // Adjust yPos based on the text height
       });
+
       doc.setFont(undefined, "bold");
-      doc.text("Total Ski: "+ String(group.groupski), headers[0].x, yPos);
-      doc.text("Total Board: "+ String(group.groupboard), headers[2].x, yPos);
+      doc.setTextColor(redColor);
+      doc.text("Total Ski: "+ String(group.groupski), headers[2].x, yPos);
+      doc.text("Total Board: "+ String(group.groupboard), headers[3].x, yPos);
       doc.text("Total Rentals: "+ String(group.totalGroupRentals), headers[4].x, yPos);
       yPos += (groupCount % 2 === 0) ? 20 : 10;
       doc.setFont(undefined, "normal");
+      doc.setTextColor(0, 0, 0); // Reset text color to black for other text
     });
 
     // Footer with total counts
     yPos = checkPageOverflow(yPos) + 5; // Ensure footer doesn't overlap with client details
-    
     doc.setFontSize(12);
-    let totalGuestRentals = helicopter.groups.reduce((acc, group) => acc + group.totalRentals, 0);
+    let totalGuestRentals = helicopter.groups.reduce((acc, group) => acc + group.totalGroupRentals, 0);
     doc.setTextColor(0, 0, 0); // Reset text color to black for footer
     doc.text(`Heli #${helicopter.heliIndex} Guest Rentals: ${totalGuestRentals}`, 10, yPos);
   });
