@@ -174,13 +174,13 @@ export default {
       zauiStatus: null,
       zauiStatusCheckInterval: null,
 
-      vue_app_server_ip: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT,
-      logout_address: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout"
+      vue_app_server_ip: process.env.VUE_APP_SERVER_IP,
+      logout_address: process.env.VUE_APP_SERVER_IP + "/logout"
     };
   },
   computed: {
     zauiStatusClass() {
-      if (!this.zauiStatus) return 'status-indicator grey'; // No status
+      if (!this.zauiStatus) return 'status-indicator grey';
       if (this.zauiStatus.responsemessage !== 'Pong') return 'status-indicator red';
       if (this.zauiStatus.responsetime > 2000) return 'status-indicator yellow';
       return 'status-indicator green';
@@ -188,7 +188,17 @@ export default {
   },
   methods: {
     login(email, password) {
-      fetch(`${this.vue_app_server_ip}/login`, {
+
+      let loginUrl = '';
+
+      if (process.env.NODE_ENV === 'production') {
+        //TODO: Make these into ENV variables
+        loginUrl = 'https://eebackend.azurewebsites.net/login';
+      } else {
+        loginUrl = 'http://localhost:8080/login';
+      }
+
+      fetch(loginUrl, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -227,7 +237,7 @@ export default {
     },
     fetchZauiStatus() {
       fetch(`${this.vue_app_server_ip}/zaui/zaui-status`, {
-        credentials: 'include', // Include cookies in the request
+        credentials: 'include',
         headers: {
           'Content-Type': 'application/json'
         }
@@ -247,10 +257,7 @@ export default {
       });
     },
     startZauiStatusCheck() {
-      // Check immediately when the component is created
       this.fetchZauiStatus();
-      // because were in app.vue for the navbar, the zauistatus is only checked once, make it so it checks on an interval.
-      // Set an interval to check every hour (3600000 milliseconds)
       this.zauiStatusCheckInterval = setInterval(this.fetchZauiStatus, 1500000);
     },
     stopZauiStatusCheck() {
@@ -261,8 +268,8 @@ export default {
   },
   mounted() {
     this.fetchZauiStatus();
-    this.vue_app_server_ip = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT;
-    this.logout_address = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout";
+    this.vue_app_server_ip = process.env.VUE_APP_SERVER_IP;
+    this.logout_address = process.env.VUE_APP_SERVER_IP + "/logout";
     
     const role = sessionStorage.getItem('role');
     const email = sessionStorage.getItem('email');
@@ -275,11 +282,11 @@ export default {
     this.startZauiStatusCheck();
   },
   beforeDestroy() {
-    // Clear the interval when the component is destroyed to prevent memory leaks
     this.stopZauiStatusCheck();
   }
 }
 </script>
+
 
 <style>
 /* Style adjustments for mobile view and responsive behavior */
