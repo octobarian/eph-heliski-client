@@ -93,6 +93,25 @@ export default function generateGroupListReport(data) {
       y = drawHeaders(doc, y);
       y += 5;
 
+//try guide here
+
+      if (group.guideFirstName && group.guideLastName) {
+        let x = 10;
+        doc.setFontSize(10);
+        doc.setTextColor(89,103,135); // text color to blue
+        doc.text(group.guideLastName, x, y);
+        x += 50;
+        doc.text(group.guideFirstName, x, y);
+        x += 50;
+        doc.text(group.guideWeight ? group.guideWeight.toString() : 'N/A', x, y);
+        x += 30;
+        doc.text('N/A', x, y); // Placeholder for beacon number
+        x += 30;
+        doc.text('N/A', x, y); // Placeholder for allergies
+        doc.setTextColor(0, 0, 0);
+        y += 10;
+      }
+
       group.clients.forEach(client => {
         let x = 10;
         doc.setFontSize(10);
@@ -102,10 +121,16 @@ export default function generateGroupListReport(data) {
         x += 50;
         doc.text(client.weight.toString(), x, y);
         x += 30;
-        doc.text(client.beacon || 'N/A', x, y);
+        doc.text(client.beaconNumber || 'N/A', x, y);
         x += 30;
         doc.setTextColor(client.medical_fields ? 255 : 0, 0, 0);
-        doc.text(client.medical_fields ? "YES" : "NO", x, y);
+        if(client.hasAllergies  === true) {
+            doc.setTextColor(255, 0, 0);
+          }
+        else{
+            doc.setTextColor(0, 0, 0);
+          }
+       doc.text(client.hasAllergies ? "YES" : "NO", x, y);
         doc.setTextColor(0);
         y += 10;
       });

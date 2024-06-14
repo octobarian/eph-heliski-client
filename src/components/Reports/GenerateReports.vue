@@ -155,6 +155,7 @@ export default {
       ReportsDataService.getGroupListReportData(this.selectedDate)
         .then(response => {
           const groupListData = response.data;
+          console.log(groupListData);
           const sortedGroupListData = groupListData.sort((a, b) => a.heliIndex - b.heliIndex);
           sortedGroupListData.forEach(trip => {
             trip.groups = trip.groups.sort((a, b) => a.groupId - b.groupId);
