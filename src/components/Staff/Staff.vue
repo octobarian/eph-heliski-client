@@ -84,6 +84,29 @@
           </select>
         </div>
         
+        <!-- New section for login details -->
+        <div class="form-group">
+          <label for="canLogin">Can Login?</label>
+          <input type="checkbox" id="canLogin" v-model="canLogin">
+        </div>
+        <div v-if="canLogin">
+          <div class="form-group">
+            <label for="loginEmail">Login Email</label>
+            <input type="email" class="form-control" id="loginEmail" v-model="loginDetails.email">
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" v-model="loginDetails.password">
+          </div>
+          <div class="form-group">
+            <label for="role">Role</label>
+            <select class="form-control" id="role" v-model="loginDetails.role">
+              <option value="office">Office</option>
+              <option value="guide">Guide</option>
+            </select>
+          </div>
+        </div>
+
         <button type="submit" class="btn btn-primary">Save Changes</button>
       </form>
     </section>
@@ -106,6 +129,12 @@ export default {
       // Editing features
       editableStaff: null,
       editablePerson: null,
+      canLogin: false, // New data property for login checkbox
+      loginDetails: {
+        email: '',
+        password: '',
+        role: 'office'
+      }
     };
   },
   methods: {
@@ -114,6 +143,13 @@ export default {
       // Make copies of the objects to avoid mutating the original data
       this.editableStaff = JSON.parse(JSON.stringify(this.staff));
       this.editablePerson = JSON.parse(JSON.stringify(this.person));
+      // Initialize login details
+      this.canLogin = false;
+      this.loginDetails = {
+        email: '',
+        password: '',
+        role: 'office'
+      };
     },
     goBack() {
       this.$router.go(-1);
@@ -135,6 +171,8 @@ export default {
       const updateData = {
         staff: this.editableStaff,
         person: this.editablePerson,
+        canLogin: this.canLogin,
+        userLogin: this.canLogin ? this.loginDetails : null
       };
 
       StaffDataService.update(this.editableStaff.staffid, updateData)

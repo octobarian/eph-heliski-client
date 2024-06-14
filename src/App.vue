@@ -1,6 +1,3 @@
-<!-- PACKAGE MANAGER APPLICATION UNDER SYSGEN-->
-<!-- CREATED BY: Riley George GITHUB: https://github.com/octobarian -->
-<!-- VERSION: 0, DATE PUBLISHED: 00-00-000 -->
 <template>
   <div id="app">
     <!-- Here is the Login section of the app, loaded first and acts like a wall to the rest of the app -->
@@ -9,17 +6,15 @@
         <h1><i class="header-icon"></i> MECHSKI</h1>
       </header>
       <div id="container">
-        <Greet v-bind:email="email" v-bind:authState="authState" v-bind:boolShowSignOut="showSignOut" />
-        <Update v-if="email" />
+        <Greet v-if="!authenticated" @login="login" />
       </div>
     </div>
-    <div v-if="authenticated && role=='office'">
-      <!-- Here is the main app when we are logged in, basically just a navbar, the rest is handled by router -->
-      <!-- This is the ADMIN Dashboard, below this is the GUIDE dashboard -->
+    <div v-if="authenticated && (role=='office' || role=='admin')">
+      <!-- Office Dashboard -->
       <nav class="navbar navbar-expand-lg navbar-custom">
         <!-- Logo, Brand name -->
         <div style="padding-left: 2%; padding-right: 50px;">
-          <img style="height:40px; margin-right:px;" src="~@/assets/logo.svg">
+          <img style="height:40px; margin-right:10px;" src="~@/assets/logo.svg">
           <router-link to="/" style="color: white;margin-left: 10px;" class="navbar-brand">EagleEX Office</router-link>
         </div>
         <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,9 +33,9 @@
                 Daily
               </a>
               <ul class="dropdown-menu" aria-labelledby="dailyDropdown">
-              <router-link to="/shuttles" class="dropdown-item">Assign Shuttles</router-link>
-              <router-link to="/runsadmin" class="dropdown-item">Runs/Zones Admin</router-link>
-              <router-link to="/wildlifeadmin" class="dropdown-item">Wildlife Admin</router-link>
+                <router-link to="/shuttles" class="dropdown-item">Assign Shuttles</router-link>
+                <router-link to="/runsadmin" class="dropdown-item">Runs/Zones Admin</router-link>
+                <router-link to="/wildlifeadmin" class="dropdown-item">Wildlife Admin</router-link>
               </ul>
             </li>
             <li>|</li>
@@ -52,7 +47,6 @@
               </a>
               <ul class="dropdown-menu" aria-labelledby="bookingsDropdown">
                 <router-link to="/reservationlist" class="dropdown-item">Reservations</router-link>
-                <!-- <router-link to="/trips" class="dropdown-item">Trips</router-link> -->
               </ul>
             </li>
             <!-- People Dropdown -->
@@ -82,7 +76,6 @@
             <li class="nav-item">
               <router-link to="/generatereports" class="nav-link">Reports</router-link>
             </li>
-            <!-- Testing Dropdown -->
           </ul>
           <!-- Sign Out button placed to the right -->
           <ul class="navbar-nav">
@@ -103,7 +96,7 @@
               </ul>
             </li>
             <li class="nav-item">
-              <a :href="logout_address" class="nav-link">Sign Out</a>
+              <a @click="logout" class="nav-link" style="cursor:pointer;">Sign Out</a>
             </li>
           </ul>
         </div>
@@ -115,7 +108,7 @@
     </div>  
 
     <div v-if="authenticated && role=='guide'">
-      <!-- This is the GUIDE Dashboard -->
+      <!-- Guide Dashboard -->
       <nav class="navbar navbar-expand-lg navbar-custom">
         <!-- Logo, Brand name -->
         <div style="padding-left: 2%; padding-right: 50px;">
@@ -147,7 +140,7 @@
               </router-link>
             </li>
             <li class="nav-item">
-              <a :href="logout_address" class="nav-link">Sign Out</a>
+              <a @click="logout" class="nav-link" style="cursor:pointer;">Sign Out</a>
             </li>
           </ul>
         </div>
@@ -160,23 +153,21 @@
     </div> 
   </div>
 </template>
-<script>
 
+<script>
 import Greet from "./Greeting";
-import Update from "./Update";
 
 export default {
   name: "app",
   components: {
     Greet,
-    Update
   },
   data() {
     return {
       email: null,
       body: null,
       showSignOut: false,
-      authenticated: true,
+      authenticated: false,
       authState: null,
 
       role: 'office',
@@ -185,7 +176,6 @@ export default {
 
       vue_app_server_ip: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT,
       logout_address: process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout"
-
     };
   },
   computed: {
@@ -196,81 +186,64 @@ export default {
       return 'status-indicator green';
     },
   },
-
-mounted() {
-
-  this.fetchZauiStatus();
-  this.vue_app_server_ip = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT;
-  this.logout_address= process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout"
-
-  fetch(`${this.vue_app_server_ip}/user`, {
-    credentials: "include" // fetch won't send cookies unless you set credentials
-  })
-      .then((response) => response.json())
-      .then((data) => {
-        if (data.authState == "Authorized"){
-          //Authenticated and Authorized
-          //check for the users role, either they are office or guide
-          console.log(JSON.stringify(data.introspectResponse));
-          if(data.introspectResponse.roles){
-            console.log(data.introspectResponse.roles);
-            if(data.introspectResponse.roles.includes('Office')){this.role = 'office'}
-            else if(data.introspectResponse.roles.includes('Guide')){this.role = 'guide'}
-            else if(data.introspectResponse.roles.includes('admin')){this.role = 'office'} //TODO: Remove this later or choose an Admin page
-            else {this.role='office'}
-            //role needs to be stored in user session so we can access it to decide which dashboard to show
-            sessionStorage.setItem("role", this.role);
-            
-          }
-          this.email = data.introspectResponse.email;
-          sessionStorage.setItem("email", this.email);
-          this.body = data.body;
-          this.showSignOut = true;
-          this.authenticated = true;
-        }
-        else if (data.authState == "notAuthorized"){
-          //Authenticated, but not authorized to access mechski
-          this.showSignOut = true;
-          this.authenticated = true;
-        }
-        else if (data.authState == "notAuthenticated"){
-          //niether Authenticated or Authorized
-          this.showSignOut = true;
-          this.authenticated = true;
-        }
-        this.authState = data.authState
-      });
-},
-created() {
-  //when App.vue is created, check for Zaui status
-  this.startZauiStatusCheck();
-},
-beforeDestroy() {
-  // Clear the interval when the component is destroyed to prevent memory leaks
-  this.stopZauiStatusCheck();
-},
-
-methods: {
-  // ... other methods ...
-    fetchZauiStatus() {
-      fetch(`${this.vue_app_server_ip}/zaui/zaui-status`, {
-          credentials: 'include', // Include cookies in the request
-          headers: {
-              'Content-Type': 'application/json'
-          }
+  methods: {
+    login(email, password) {
+      fetch(`${this.vue_app_server_ip}/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ email, password })
       })
-      .then(response => {
-          if (!response.ok) {
-              throw new Error('Network response was not ok');
-          }
-          return response.json();
-      })
+      .then(response => response.json())
       .then(data => {
-          this.zauiStatus = data;
+        if (data.authenticated) {
+          this.authenticated = true;
+          this.role = data.role;
+          this.email = data.email;
+          this.authState = 'Authorized';
+          sessionStorage.setItem('role', this.role);
+          sessionStorage.setItem('email', this.email);
+        } else {
+          this.authState = 'notAuthorized';
+        }
       })
       .catch(error => {
-          console.error(this.vue_app_server_ip);
-          console.error('Error fetching Zaui status:', error);
+        console.error('Error during login:', error);
+      });
+    },
+    logout() {
+      fetch(this.logout_address, {
+        credentials: 'include'
+      })
+      .then(() => {
+        this.authenticated = false;
+        this.role = '';
+        sessionStorage.clear();
+      })
+      .catch(error => {
+        console.error('Error during logout:', error);
+      });
+    },
+    fetchZauiStatus() {
+      fetch(`${this.vue_app_server_ip}/zaui/zaui-status`, {
+        credentials: 'include', // Include cookies in the request
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      })
+      .then(response => {
+        if (!response.ok) {
+          throw new Error('Network response was not ok');
+        }
+        return response.json();
+      })
+      .then(data => {
+        this.zauiStatus = data;
+      })
+      .catch(error => {
+        console.error(this.vue_app_server_ip);
+        console.error('Error fetching Zaui status:', error);
       });
     },
     startZauiStatusCheck() {
@@ -284,8 +257,27 @@ methods: {
       if (this.zauiStatusCheckInterval) {
         clearInterval(this.zauiStatusCheckInterval);
       }
-    }, 
+    },
   },
+  mounted() {
+    this.fetchZauiStatus();
+    this.vue_app_server_ip = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT;
+    this.logout_address = process.env.VUE_APP_SERVERIP+":"+process.env.VUE_APP_SERVERPORT+"/logout";
+    
+    const role = sessionStorage.getItem('role');
+    const email = sessionStorage.getItem('email');
+    if (role && email) {
+      this.role = role;
+      this.email = email;
+      this.authenticated = true;
+    }
+
+    this.startZauiStatusCheck();
+  },
+  beforeDestroy() {
+    // Clear the interval when the component is destroyed to prevent memory leaks
+    this.stopZauiStatusCheck();
+  }
 }
 </script>
 
@@ -406,7 +398,6 @@ header h1 {
     background-size: cover; /* Ensure the image covers the area */
     margin-right: 10px; /* Space after the header icon */
 }
-
 
 .status-indicator {
     display: inline-block; /* Inline-block for the status indicators */
