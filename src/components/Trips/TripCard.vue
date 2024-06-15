@@ -73,6 +73,7 @@
       <div class="notes-container">
         <textarea v-model="noteContent"></textarea>
         <button class="save-note" @click="saveNote">Save Note</button>
+        <SavedMessage :visible="noteSaved" />
       </div>
     </div>
   </div>
@@ -87,6 +88,7 @@ import TripGroup from './TripGroup.vue';
 import TripDataService from '@/services/TripDataService';
 import NotesDataService from '@/services/NotesDataService';
 import StaffDataService from '@/services/StaffDataService';
+import SavedMessage from '../Notes/SavedMessage.vue';
 
 export default {
   props: {
@@ -119,7 +121,8 @@ export default {
   components: {
     // Register the new component
     // TripWeight,
-    TripGroup
+    TripGroup,
+    SavedMessage
   },
   data() {
     return {
@@ -136,6 +139,7 @@ export default {
       noteId: null,
       loggedInPersonId: null,
       tripGroups: this.tripData.groups || [],
+      noteSaved: false,
     };
   },
   watch: {
@@ -333,6 +337,7 @@ export default {
         NotesDataService.update(this.noteId, noteData)
           .then(() => {
             this.updateTrip();
+            this.animateSavedMessage();
           })
           .catch(error => {
             console.error("Error updating note:", error);
@@ -348,6 +353,12 @@ export default {
             console.error("Error creating note:", error);
           });
       }
+    },
+    animateSavedMessage() {
+      this.noteSaved = true;
+      setTimeout(() => {
+        this.noteSaved = false;
+      }, 3000);
     },
     handleGearWeightUpdate(newGearWeight) {
       console.log(newGearWeight);
