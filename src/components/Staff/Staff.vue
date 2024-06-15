@@ -34,7 +34,9 @@
         <h3>Job Details</h3>
         <div v-if="staff">
           <p><strong>Job Title:</strong> {{ staff.job ? staff.job.jobtitle : 'N/A' }}</p>
-          <!-- Add other job details here -->
+          <br>
+          <p><strong>Can Login?:</strong> {{ canLogin ? 'True' : 'False' }}</p>
+          <p><strong>EagleEX Role:</strong> {{ loginDetails.role }}</p>
         </div>
         <div v-else>
           <p>Loading job details...</p>
@@ -143,13 +145,21 @@ export default {
       // Make copies of the objects to avoid mutating the original data
       this.editableStaff = JSON.parse(JSON.stringify(this.staff));
       this.editablePerson = JSON.parse(JSON.stringify(this.person));
-      // Initialize login details
-      this.canLogin = false;
-      this.loginDetails = {
-        email: '',
-        password: '',
-        role: 'office'
-      };
+      // Initialize login details if available
+      if (this.canLogin && this.staff.logins && this.staff.logins.length > 0) {
+        this.loginDetails = {
+          email: this.staff.logins[0].email,
+          password: '',
+          role: this.staff.logins[0].role
+        };
+      } else {
+        this.canLogin = false;
+        this.loginDetails = {
+          email: '',
+          password: '',
+          role: 'office'
+        };
+      }
     },
     goBack() {
       this.$router.go(-1);
@@ -161,6 +171,18 @@ export default {
           console.log(response);
           this.staff = response.data;
           this.person = response.data.person;
+          this.canLogin = response.data.logins && response.data.logins.length > 0;
+          if (this.canLogin) {
+            this.loginDetails = {
+              email: response.data.logins[0].email,
+              role: response.data.logins[0].role
+            };
+          } else {
+            this.loginDetails = {
+              email: '',
+              role: 'N/A'
+            };
+          }
           // Handle other data fetching here
         })
         .catch(e => {
