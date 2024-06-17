@@ -1,22 +1,22 @@
-#installation
-###Install Git, NPM and NVM
+# installation
+### Install Git, NPM and NVM
 ```
 sudo apt install git
 sudo apt install nodejs
 
 curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
 ```
-###Ensure we are using NPM 10.2.4, Node 20.11.1
+### Ensure we are using NPM 10.2.4, Node 20.11.1
 ```
 npm --version
 node --version
 ```
-###Install the project repo
+### Install the project repo
 ```
 mkdir ~/sites
 cd ~/sites
 ```
-###Config your GIT with SSH
+### Config your GIT with SSH
 ```
 git config --global user.name "<Your Name>"
 git config --global user.email "<your-email@example.com>"
@@ -32,11 +32,11 @@ copy your public ssh key, go to github.com
 Sign in to your GitHub account and navigate to “Settings” -> “SSH and GPG keys” -> “New SSH key”.
 call it “Ubuntu SSH Key,” and paste your public key into the “Key” field.
 
-###test your github connection
+### test your github connection
 ```
 ssh -T git@github.com
 ```
-###copy repo's
+### copy repo's
 ```
 git pull https://github.com/octobarian/eph-heliski-client.git
 git pull https://github.com/octobarian/eph-heliski-server.git
@@ -70,7 +70,10 @@ npm run serve
 http://localhost:8081/
 ```
 
-#Modification for running
+# Modification for running
 Dont forget to add the server .env, the client .env.development, .env.production.
+
 dont forget to build the postgres server, and import the SQL dump
+
 dont forget to ensure the db.config matches your postgres configuration
+
