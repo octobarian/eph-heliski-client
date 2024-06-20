@@ -4,7 +4,7 @@ export default function generateGroupListReport(data) {
   const doc = new jsPDF('portrait');
 
   // Adding a cover page
-  const addCoverPage = (doc, helicopterIds, groupIds, totalClients, reportDate) => {
+  const addCoverPage = (doc, helicopterIds, groupIds, totalClients, reportDate, helicoptersData) => {
     doc.setFontSize(20);
     doc.text("Client Group List", 10, 20);
     doc.setFontSize(16);
@@ -12,21 +12,69 @@ export default function generateGroupListReport(data) {
     doc.text(`Date: ${reportDate}`, 10, 40);
 
     const summaries = [
-      {
+      /*{
         title: 'Heli Breakdown',
         details: `Helicopters: ${helicopterIds.join(', ')}`
       },
       {
         title: 'Groups',
         details: `Group IDs: ${groupIds.join(', ')}`
-      },
+      },*/
       {
         title: 'Total Clients',
         details: `Total Clients: ${totalClients}`
       }
     ];
-
+    console.log(helicoptersData);
+    console.log(groupIds);
+    // Drawing the headers for main page table 
     let y = 60;
+
+//build table here
+const drawMainHeaders = (doc, y) => {
+  doc.setFontSize(12);
+  doc.setFont('helvetica','bold');
+  const Mainheaders = [
+    { mainheader: 'Heli', width: 50 },
+    { mainheader: 'Group', width: 50 }
+  ];
+
+  let x = 10;
+  Mainheaders.forEach(mainhead => {
+    doc.setDrawColor(0);
+    doc.setFillColor(211, 211, 211);
+    doc.rect(x, y, mainhead.width, 10, 'FD');
+    doc.text(mainhead.mainheader, x + 5, y + 7);
+    x += mainhead.width;
+  });
+  doc.setFont('helvetica','normal');
+  return y + 10;
+};
+    y = drawMainHeaders(doc, y);
+    y += 5;
+    doc.setFontSize(10);
+helicoptersData.forEach(heliObj => {
+  heliObj.groups.forEach(groupObj => {
+    let x =15;
+    let rectWidth = 50; // Width of each column
+    let rectHeight = 10; // Height of each row
+     // Draw rectangle for 'Heli' column
+     doc.setDrawColor(0);
+     doc.setFillColor(255, 255, 255); // White fill for 'Heli' column
+     doc.rect(x-5, y-5, rectWidth, rectHeight, 'FD');
+    doc.text(`Heli #${heliObj.heliIndex}`, x, y);
+    x+=rectWidth; // Width of each column
+    doc.setDrawColor(0);
+    doc.setFillColor(255, 255, 255); // White fill for 'Group' column
+    doc.rect(x-5, y-5, rectWidth, rectHeight, 'FD');
+    doc.text(`Group #${groupObj.groupIndex}`, x, y);
+    y += rectHeight ;
+  });
+});
+y+=10;
+
+
+
     summaries.forEach(summary => {
       doc.setFontSize(12);
       doc.text(summary.title, 10, y);
@@ -39,6 +87,7 @@ export default function generateGroupListReport(data) {
   };
 
   // Drawing the headers for each group section
+  
   const drawHeaders = (doc, y) => {
     doc.setFontSize(10);
     const headers = [
@@ -61,6 +110,24 @@ export default function generateGroupListReport(data) {
     return y + 10;
   };
 
+  let helicoptersData = [];
+
+  data.forEach(helicopter => {
+      let heliObj = {
+          heliIndex: helicopter.heliIndex,
+          groups: []
+      };
+      helicopter.groups.forEach(group => {
+          let groupObj = {
+              groupIndex: group.groupIndex
+          };
+          heliObj.groups.push(groupObj);
+      });
+  
+      helicoptersData.push(heliObj);
+  });
+   
+
   // Assuming 'data' is an array where each entry represents a helicopter's data.
   const allHelicopterIds = data.map(helicopter => `Heli #${helicopter.heliIndex}`);
   const allGroupIds = [];
@@ -78,7 +145,7 @@ export default function generateGroupListReport(data) {
   const reportDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
   // Pass this data to the cover page function
-  addCoverPage(doc, allHelicopterIds, allGroupIds, totalClients, reportDate);
+  addCoverPage(doc, allHelicopterIds, allGroupIds, totalClients, reportDate, helicoptersData);
 
   data.forEach((helicopter, index) => {
     if (index > 0) doc.addPage();
@@ -92,37 +159,70 @@ export default function generateGroupListReport(data) {
       doc.text(`Group #${group.groupIndex}`, 10, y - 5);
       y = drawHeaders(doc, y);
       y += 5;
+      let rectWidth = 50; // Width of each 50 column
+      let rectWidth30 = 30; // Width of each 50 column
+      let rectHeight = 10; // Height of each row
 
 //try guide here
 
       if (group.guideFirstName && group.guideLastName) {
-        let x = 10;
+        let x = 15;
         doc.setFontSize(10);
         doc.setTextColor(89,103,135); // text color to blue
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Guide Last Name' column
+        doc.rect(x-5, y-5, rectWidth, rectHeight, 'FD');
         doc.text(group.guideLastName, x, y);
         x += 50;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Guide First Name' column
+        doc.rect(x-5, y-5, rectWidth, rectHeight, 'FD');
         doc.text(group.guideFirstName, x, y);
         x += 50;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Guide Weight' column
+        doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.text(group.guideWeight ? group.guideWeight.toString() : 'N/A', x, y);
         x += 30;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Beacon Number' column
+        doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.text('N/A', x, y); // Placeholder for beacon number
         x += 30;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Allergies' column
+        doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.text('N/A', x, y); // Placeholder for allergies
         doc.setTextColor(0, 0, 0);
         y += 10;
       }
 
       group.clients.forEach(client => {
-        let x = 10;
+        let x = 15;
         doc.setFontSize(10);
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Client Last Name' column
+        doc.rect(x-5, y-5, rectWidth, rectHeight, 'FD');
         doc.text(client.lastName, x, y);
         x += 50;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Client First Name' column
+        doc.rect(x-5, y-5, rectWidth, rectHeight, 'FD');
         doc.text(client.firstName, x, y);
         x += 50;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Client Weight' column
+        doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.text(client.weight.toString(), x, y);
         x += 30;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Beacon Number' column
+        doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.text(client.beaconNumber || 'N/A', x, y);
         x += 30;
+        doc.setDrawColor(0);
+        doc.setFillColor(255, 255, 255); // White fill for 'Allergies' column
+        doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.setTextColor(client.medical_fields ? 255 : 0, 0, 0);
         if(client.hasAllergies  === true) {
             doc.setTextColor(255, 0, 0);
@@ -135,7 +235,7 @@ export default function generateGroupListReport(data) {
         y += 10;
       });
 
-      doc.text(`Fuel Percentage: ${group.fuelPercentage}%`, 10, y + 5);
+      doc.text(`Fuel Percentage: ${group.fuelPercentage}%`, 10, y);
       y += 20;
     });
   });
