@@ -201,7 +201,7 @@ export default {
         .then(() => {
           // Assuming back-end only sends a success message
           // Manually update local data, or re-fetch data from server
-          this.staff = { ...this.staff, ...this.editableStaff };
+          this.staff = { ...this.staff, ...this.editableStaff }; 
           this.person = { ...this.person, ...this.editablePerson };
           this.editing = false;
         })
