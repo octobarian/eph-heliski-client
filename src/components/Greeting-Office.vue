@@ -11,7 +11,7 @@
       <div class="row trips-container">
         <div class="col-lg-6 col-md-12 mb-4" 
              v-for="(trip, index) in trips" 
-             :key="trip.tripid">
+             :key="trip.tripId">
           <TripCard
             :tripData="trip"
             :tripNumber="index + 1"
@@ -22,6 +22,7 @@
             @tripDeleted="handleTripDeleted"
             @removeReservationFromTrip="handleRemoveReservationFromTrip"
             @clientRemoved="handleClientRemoved"
+            @updateTrip="fetchTripsByDate"
           />
         </div>
         <div class="col-lg-6 col-md-12 mb-4 new-trip-card" @click="createNewTrip">
@@ -39,7 +40,6 @@
     </div>
   </div>
 </template>
-
 
 <script>
 import TripCard from './Trips/TripCard.vue';
@@ -78,11 +78,12 @@ export default {
     fetchTripsByDate() {
       TripDataService.fetchTripsByDate(this.selectedDate)
         .then(response => {
+          console.log('Fetching Trips')
           this.trips = response.data.map(trip => {
             console.log(trip);
             trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
             return trip;
-          }).sort((a, b) => a.tripid - b.tripid); // Sort by tripid
+          }).sort((a, b) => a.sortingindex - b.sortingindex || a.tripid - b.tripid); // Sort by sortingindex, then by tripid
         })
         .catch(error => {
           console.error("Error fetching trips:", error);
@@ -91,27 +92,21 @@ export default {
       this.fetchUnassignedReservations();
     },
     fetchUnassignedReservations() {
-      // console.log("Finding Reservations for "+this.selectedDate);
       ReservationDataService.findByDate(this.selectedDate)
         .then(response => {
           this.unassignedReservations = response.data;
-          // console.log(this.unassignedReservations);
         })
         .catch(error => {
           console.error("Error fetching unassigned reservations:", error);
         });
     },
-
-    // In Greeting-Office.vue, inside the methods object
     handleClientRemoved() {
-        this.fetchTripsByDate(); // Refresh trip data
-        this.fetchUnassignedReservations(); // Refresh unassigned reservations
+      this.fetchTripsByDate();
+      this.fetchUnassignedReservations();
     },
-
     handleReservationAssignment(data) {
       TripDataService.assignReservationToTripGroup(data)
         .then(() => {
-          // Call a method to update the local data
           this.updateLocalDataAfterAssignment(data);
           this.fetchTripsByDate();
         })
@@ -122,7 +117,6 @@ export default {
     handleRemoveReservationFromTrip(data) {
       TripDataService.removeReservationFromTrip(data.tripId, data.reservationId)
         .then(() => {
-          // Update the UI as necessary, e.g., fetch trips again
           this.fetchTripsByDate();
         })
         .catch(error => {
@@ -130,30 +124,23 @@ export default {
         });
     },
     updateLocalDataAfterAssignment(data) {
-      // Remove from unassigned reservations
       this.unassignedReservations = this.unassignedReservations.filter(reservation => reservation.reservationid !== data.reservationId);
-
-      // Find the trip and add the reservation to it
-      const trip = this.trips.find(t => t.tripid === data.tripId);
+      const trip = this.trips.find(t => t.tripId === data.tripId);
       if (trip) {
         if (!trip.reservationids) {
           trip.reservationids = [];
         }
         trip.reservationids.push(data.reservationId);
       }
-
-      // Since Vue reactivity might not pick up changes to nested properties, 
-      // you might need to force an update by replacing the trips array
-      this.trips = [...this.trips].sort((a, b) => a.tripid - b.tripid);
+      this.trips = [...this.trips].sort((a, b) => a.sortingindex - b.sortingindex || a.tripid - b.tripid);
     },
     createNewTrip() {
       const newTrip = {
         date: this.selectedDate,
-        // Other fields are null or empty as per your requirements
       };
       TripDataService.createTrip(newTrip)
         .then(response => {
-          this.trips.push(response.data); // Add the new trip to the list
+          this.trips.push(response.data);
           this.fetchTripsByDate();
         })
         .catch(error => {
@@ -161,7 +148,7 @@ export default {
         });
     },
     handleTripDeleted(deletedTripId) {
-      this.trips = this.trips.filter(trip => trip.tripid !== deletedTripId);
+      this.trips = this.trips.filter(trip => trip.tripId !== deletedTripId);
       this.fetchTripsByDate();
     },
     fetchPilots() {
@@ -206,7 +193,6 @@ export default {
     this.fetchPilots();
     this.fetchGuides();
     this.fetchHelicopters();
-    this.fetchTripsByDate();
     this.fetchBeacons();
   }
 };

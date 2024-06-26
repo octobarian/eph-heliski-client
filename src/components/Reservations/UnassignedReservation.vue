@@ -133,10 +133,10 @@ export default {
       return ''; // default class if needed
     },
     sortedTrips() {
-      return this.trips.slice().sort((a, b) => a.tripId - b.tripId);
+      return this.trips.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.tripId - b.tripId);
     },
     sortedGroups() {
-      return this.groups.slice().sort((a, b) => a.trip_group_id - b.trip_group_id);
+      return this.groups.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.trip_group_id - b.trip_group_id);
     }
   },
 };

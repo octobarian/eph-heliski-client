@@ -86,13 +86,13 @@ export default {
     async fetchTripsByDate() {
       try {
         const response = await TripDataService.fetchTripsByDate(this.selectedDate);
-        // Sort trips by tripId
-        this.trips = response.data.sort((a, b) => a.tripId - b.tripId);
+        this.trips = response.data;
 
-        // Sort trip groups by groupId within each trip
-        this.trips.forEach(trip => {
-          trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
-        });
+        // Sort trips and their groups
+        this.trips = this.trips.map(trip => {
+          trip.groups = trip.groups.sort((a, b) => a.sortingindex - b.sortingindex || a.groupid - b.groupid);
+          return trip;
+        }).sort((a, b) => a.sortingindex - b.sortingindex || a.tripId - b.tripId);
 
         const tripIds = this.trips.map(trip => trip.tripId);
         const clientIds = this.trips.flatMap(trip => trip.groups.flatMap(group => group.clients.map(client => client.tripClientId)));
@@ -145,7 +145,7 @@ export default {
         arrivalTime: client.arrivalTime,
         flightTime: client.flightTime,
         pickupLocation: client.pickupLocation,
-        tripclientid: client.tripClientId // Ensure the tripclientid is passed
+        tripclientid: client.tripClientId
       };
 
       ShuttleDataService.updateGroupShuttle(tripId, groupId, clientId, updateData)
@@ -203,12 +203,12 @@ export default {
       }
     },
     sortedGroups(groups) {
-      return groups.slice().sort((a, b) => a.groupid - b.groupid);
+      return groups.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.groupid - b.groupid);
     },
   },
   computed: {
     sortedTrips() {
-      return this.trips.slice().sort((a, b) => a.tripId - b.tripId);
+      return this.trips.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.tripId - b.tripId);
     }
   },
   created() {
