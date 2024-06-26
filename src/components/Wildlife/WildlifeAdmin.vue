@@ -13,9 +13,9 @@
                 <p>No trips found for the selected date.</p>
             </div>
             <div v-else class="trips-container">
-                <div v-for="(trip, tripIndex) in sortedTrips" :key="trip.tripId" class="trip-card">
+                <div v-for="(trip, tripIndex) in sortedTrips" :key="trip.tripid" class="trip-card">
                     <div class="trip-header" @click="toggleTripCollapse(trip)">
-                        <h2>Heli #{{ tripIndex + 1 }} ({{ trip.triptype || '' }})</h2>
+                        <h2>Heli #{{ tripIndex + 1 }} ({{ trip.triptype || '' }}) Sort: {{ trip.sortingindex }}</h2>
                         <span>{{ trip.isCollapsed ? '▼' : '▲' }}</span>
                     </div>
                     <div v-if="!trip.isCollapsed" class="groups-container">
@@ -64,7 +64,7 @@
                                             </td>
                                             <td><input type="text" v-model="group.newSighting.type" placeholder="Type" /></td>
                                             <td><input type="text" v-model="group.newSighting.comments" placeholder="Comments" /></td>
-                                            <td><input type="time" v-model="group.newSighting.spottedTime" /></td>
+                                            <td><input type="time" v-model="group.newSighting.spottedtime" /></td>
                                             <td><button class="add-button" @click="addSighting(group)">Add Spotting</button></td>
                                         </tr>
                                     </tbody>
@@ -110,10 +110,10 @@ export default {
     },
     computed: {
         sortedTrips() {
-            return this.trips.slice().sort((a, b) => a.tripId - b.tripId);
+            return this.trips.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.tripid - b.tripid);
         },
         sortedGroups() {
-            return (groups) => groups.slice().sort((a, b) => a.groupid - b.groupid);
+            return (groups) => groups.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.groupid - b.groupid);
         },
     },
     methods: {
@@ -130,32 +130,32 @@ export default {
         fetchTripsByDate() {
             TripDataService.fetchTripsByDate(this.selectedDate)
                 .then(response => {
-                // Sort trips by tripId
-                this.trips = response.data.sort((a, b) => a.tripId - b.tripId);
+                    // Sort trips by sortingindex and tripid
+                    this.trips = response.data.sort((a, b) => a.sortingindex - b.sortingindex || a.tripid - b.tripid);
 
-                // Sort trip groups by groupid within each trip
-                this.trips.forEach(trip => {
-                    trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
-                });
+                    // Sort trip groups by sortingindex and groupid within each trip
+                    this.trips.forEach(trip => {
+                        trip.groups = trip.groups.sort((a, b) => a.sortingindex - b.sortingindex || a.groupid - b.groupid);
+                    });
 
-                this.trips.forEach(trip => {
-                    this.$set(trip, 'isCollapsed', true);
-                    trip.groups.forEach(group => {
-                    this.$set(group, 'newSighting', {
-                        zoneid: '',
-                        runid: '',
-                        species: '',
-                        type: '',
-                        comments: '',
-                        spottedTime: ''
+                    this.trips.forEach(trip => {
+                        this.$set(trip, 'isCollapsed', true);
+                        trip.groups.forEach(group => {
+                            this.$set(group, 'newSighting', {
+                                zoneid: '',
+                                runid: '',
+                                species: '',
+                                type: '',
+                                comments: '',
+                                spottedtime: ''
+                            });
+                            this.fetchWildlifeForGroup(this.selectedDate, group);
+                        });
                     });
-                    this.fetchWildlifeForGroup(this.selectedDate, group);
-                    });
+                })
+                .catch(e => {
+                    console.log(e);
                 });
-            })
-            .catch(e => {
-            console.log(e);
-            });
         },
         fetchWildlifeForGroup(date, group) {
             WildlifeDataService.getByDateAndTripGroup(date, group.groupid)
@@ -176,7 +176,7 @@ export default {
                 });
         },
         addSighting(group) {
-            const spottedDateTime = this.selectedDate + 'T' + group.newSighting.spottedTime;
+            const spottedDateTime = this.selectedDate + 'T' + group.newSighting.spottedtime;
             const newSighting = {
                 runid: group.newSighting.runid,
                 type: group.newSighting.type,
@@ -186,7 +186,7 @@ export default {
                 sightingdetails: '',
                 isplaceholder: false,
                 tripgroupid: group.groupid,
-                spottedTime: spottedDateTime
+                spottedtime: spottedDateTime
             };
 
             WildlifeDataService.create(newSighting)
@@ -197,7 +197,7 @@ export default {
                     group.newSighting.species = '';
                     group.newSighting.type = '';
                     group.newSighting.comments = '';
-                    group.newSighting.spottedTime = '';
+                    group.newSighting.spottedtime = '';
                 })
                 .catch(e => {
                     console.log(e);

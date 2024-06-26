@@ -53,11 +53,11 @@
                         <input type="number" class="form-control" id="fuelamounttotal" v-model="newHelicopter.fuelamounttotal" required>
                     </div>
                     <div class="mb-3">
-                        <label for="weight" class="form-label">Weight</label>
+                        <label for="weight" class="form-label">Empty Weight</label>
                         <input type="number" class="form-control" id="weight" v-model="newHelicopter.weight" required>
                     </div>
                     <div class="mb-3">
-                        <label for="maxweight" class="form-label">Max Weight</label>
+                        <label for="maxweight" class="form-label">Gross Weight</label>
                         <input type="number" class="form-control" id="maxweight" v-model="newHelicopter.maxweight" required>
                     </div>
                     <button type="submit" class="btn btn-primary">Create</button>

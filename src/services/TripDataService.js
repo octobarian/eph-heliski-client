@@ -87,6 +87,11 @@ class TripDataService {
   updateTraining(data) {
     return http.post("/trips/updateTraining", data);
   }
+
+  // Fetch the fuel percentage for a trip group
+  getTripGroupFuelPercentage(tripGroupId) {
+    return http.get(`/trips/group/${tripGroupId}/fuelPercentage`);
+  }
   
 }
 

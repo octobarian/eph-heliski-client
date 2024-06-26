@@ -1,20 +1,33 @@
 <template>
   <div class="trip-card card">
     <div class="card-header" :style="tripTypeStyle">
-      <div class="row">
-        <div>
+      <div class="row align-items-center">
+        <div class="trip-header-section">
           <h2 class="tripnumberheader">Heli #{{ tripNumber }}</h2>
-          <select v-model="editableTripData.triptype" @change="updateTrip" :style="tripTypeStyle">
+          <div class="sorting-section">
+            <label>Sort:</label>
+            <div class="sorting-controls">
+              <button @click="decrementSortingIndex">-</button>
+              <span>{{ editableTripData.sortingindex }}</span>
+              <button @click="incrementSortingIndex">+</button>
+            </div>
+          </div>
+          <span style="width: 1px;"></span>
+          <button class="btn btn-danger" @click="confirmDeletion">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+              <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+              <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+            </svg>
+          </button>
+        </div>
+        <select v-model="editableTripData.triptype" @change="updateTrip" :style="tripTypeStyle">
             <option value="Private">Private</option>
             <option value="Lodge">Lodge</option>
             <option value="Day Heli">Day Heli</option>
             <option value="Media">Media</option>
           </select>
-        </div>
-        <!-- <p>Trip ID: {{ tripData.tripId }}</p> -->
       </div>
-      <div class=" row pilots-helicopters-section">
-        <!-- Pilots Section -->
+      <div class="row pilots-helicopters-section">
         <div class="pilots-section">
           <label>Pilot:</label>
           <select v-model="editableTripData.pilotId" class="form-select">
@@ -24,7 +37,6 @@
             </option>
           </select>
         </div>
-        <!-- Helicopters Section -->
         <div class="helicopter-section">
           <label>Helicopter:</label>
           <select v-model="editableTripData.helicopterId" class="form-select">
@@ -35,16 +47,10 @@
           </select>
         </div>
       </div>
-      <button class="btn btn-danger" @click="confirmDeletion">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-          <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
-          <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
-        </svg>
-      </button>
+      
     </div>
 
     <div class="card-body">
-      <!-- Trip Groups Section -->
       <div class="trip-groups-header">
         <h5 class="card-title">Heli Groups</h5>
         <button class="btn btn-primary" @click="createNewGroup">New Group</button>
@@ -68,7 +74,6 @@
           @removeClient="(client) => handleRemoveClient(client)"
         ></trip-group>
       </div>
-      <!-- <TripWeight :tripData="tripData" @gearWeightUpdated="handleGearWeightUpdate" /> -->
       <label>Notes:</label>
       <div class="notes-container">
         <textarea v-model="noteContent"></textarea>
@@ -80,11 +85,7 @@
 </template>
 
 <script>
-//components
-// import TripWeight from './TripWeight.vue';
 import TripGroup from './TripGroup.vue';
-
-//services
 import TripDataService from '@/services/TripDataService';
 import NotesDataService from '@/services/NotesDataService';
 import StaffDataService from '@/services/StaffDataService';
@@ -119,8 +120,6 @@ export default {
     this.fetchLoggedInPersonId();
   },
   components: {
-    // Register the new component
-    // TripWeight,
     TripGroup,
     SavedMessage
   },
@@ -131,8 +130,9 @@ export default {
         pilotId: this.tripData.pilot ? this.tripData.pilot.staffid : '',
         helicopterId: this.tripData.helicopter ? this.tripData.helicopter.helicopterid : '',
         triptype: this.tripData.triptype || '',
-        notes: this.tripData.notes ? this.tripData.notes: [],
+        notes: this.tripData.notes ? this.tripData.notes : [],
         guides: this.tripData.guides || [],
+        sortingindex: this.tripData.sortingindex || 1
       },
       totalGearWeight: 0,
       noteContent: '',
@@ -143,14 +143,13 @@ export default {
     };
   },
   watch: {
-    //If there is changes to the editable values, save the trip automatically
-    'editableTripData.pilotId': function(newVal, oldVal) {
+    'editableTripData.pilotId': function (newVal, oldVal) {
       if (newVal !== oldVal) this.updateTrip();
     },
-    'editableTripData.helicopterId': function(newVal, oldVal) {
+    'editableTripData.helicopterId': function (newVal, oldVal) {
       if (newVal !== oldVal) this.updateTrip();
     },
-    'editableTripData.triptype': function(newVal, oldVal) {
+    'editableTripData.triptype': function (newVal, oldVal) {
       if (newVal !== oldVal) this.updateTrip();
     },
     selectedGuideId(newValue) {
@@ -158,20 +157,19 @@ export default {
         const guide = this.allGuides.find(g => g.staffid == newValue);
         if (guide && !this.tripData.guides.some(g => g.personid === guide.person.personid)) {
           this.tripData.guides.push({ ...guide.person });
-          this.updateTrip(); // Update the trip after adding a guide
+          this.updateTrip();
         }
-        this.selectedGuideId = ''; // Reset the selected guide ID
+        this.selectedGuideId = '';
       }
     },
   },
-  computed:{
+  computed: {
     availableGuides() {
       return this.allGuides.map(guide => {
-        // Check if the guide is already selected
         const isGuideSelected = this.tripData.guides.some(g => g.personid === guide.person.personid);
         return {
           ...guide,
-          isDisabled: isGuideSelected // Add an isDisabled property
+          isDisabled: isGuideSelected
         };
       });
     },
@@ -182,23 +180,23 @@ export default {
       switch (this.editableTripData.triptype) {
         case 'Private':
           borderColor = 'var(--private-event-color)';
-          backgroundColor = 'rgba(247, 191, 47, 0.3)'; // Equivalent rgba for --private-event-color
+          backgroundColor = 'rgba(247, 191, 47, 0.3)';
           break;
         case 'Lodge':
           borderColor = 'var(--lodge-event-color)';
-          backgroundColor = 'rgba(237, 98, 64, 0.3)'; // Equivalent rgba for --lodge-event-color
+          backgroundColor = 'rgba(237, 98, 64, 0.3)';
           break;
         case 'Day Heli':
           borderColor = 'var(--day-event-color)';
-          backgroundColor = 'rgba(109, 123, 156, 0.3)'; // Equivalent rgba for --day-event-color
+          backgroundColor = 'rgba(109, 123, 156, 0.3)';
           break;
         case 'Media':
           borderColor = 'var(--minor-media-event-color)';
-          backgroundColor = 'rgba(95, 184, 100, 0.3)'; // Equivalent rgba for --minor-media-event-color
+          backgroundColor = 'rgba(95, 184, 100, 0.3)';
           break;
         default:
-          borderColor = '#ccc'; // Default border color
-          backgroundColor = 'rgba(204, 204, 204, 0.3)'; // Default background color with opacity
+          borderColor = '#ccc';
+          backgroundColor = 'rgba(204, 204, 204, 0.3)';
       }
 
       return {
@@ -208,75 +206,49 @@ export default {
     }
   },
   methods: {
-    //TODO: Placeholder functions till program deals with it
     createNewGroup() {
-      //console.log('Creating a new group for trip ID:', this.tripData.tripId);
       TripDataService.createGroup(this.tripData.tripId)
-          .then(response => {
-              //console.log('New group created successfully:', response.data);
-              // Add the new group to the tripData.groups array to update the UI
-              this.tripData.groups = [...this.tripData.groups, response.data];
-              this.$emit('clientRemoved');
-          })
-          .catch(error => {
-              console.error('Error creating new group:', error);
-              // Optionally, handle the error, e.g., by showing an error message
-          });
+        .then(response => {
+          this.tripData.groups = [...this.tripData.groups, response.data];
+          this.$emit('clientRemoved');
+        })
+        .catch(error => {
+          console.error('Error creating new group:', error);
+        });
     },
     handleDeleteGroup(groupId) {
-      // Display confirmation dialog before deletion
       const confirmation = window.confirm("Deleting the group will unassign all clients in the group, are you sure you want to delete this group?");
 
       if (confirmation) {
-        // Make sure you have a service to handle API requests
         TripDataService.deleteGroup(groupId)
           .then(() => {
-            //console.log('Group deleted successfully');
-            // Remove the deleted group from the tripData.groups array
             this.tripData.groups = this.tripData.groups.filter(group => group.groupid !== groupId);
             this.$emit('clientRemoved');
-            // Optionally, you might want to emit an event to notify the parent component
           })
           .catch(error => {
             console.error('Error deleting group:', error);
-            // Optionally, handle the error, e.g., by showing an error message to the user
           });
-      } else {
-        // The user clicked "No" or closed the confirmation dialog
-        // console.log('Group deletion cancelled.');
       }
     },
-    // eslint-disable-next-line no-unused-vars
     handleRemoveGuide(guide) {
-      // Implement the logic to remove the guide from the group
-      //console.log('Removing guide:', guide);
-      // Update your state or make an API call here
+      console.log(guide);
     },
     handleRemoveClient(clientInfo) {
-      //console.log(clientInfo); // Log to verify structure
-      // Change clientId to tripClientId
       TripDataService.removeClientFromGroup(clientInfo.groupId, clientInfo.tripClientId)
         .then(() => {
-            console.log('Client removed from group successfully');
-            this.$emit('clientRemoved', clientInfo);
+          this.$emit('clientRemoved', clientInfo);
         })
         .catch(error => {
-            console.error('Error removing client from group:', error);
+          console.error('Error removing client from group:', error);
         });
     },
-
     handleUpdateGuide(selectedGuideId, groupId) {
-      console.log(`Updating guide ${selectedGuideId} for group ${groupId}`);
       TripDataService.updateGroupGuide(groupId, selectedGuideId)
-        .then(() => {
-          // Optionally, refresh the group or trip data here
-          console.log("Guide updated successfully");
-        })
+        .then(() => {})
         .catch(error => {
           console.error("Error updating guide:", error);
         });
     },
-
     fetchLoggedInPersonId() {
       const email = sessionStorage.getItem('email');
       if (email) {
@@ -292,39 +264,26 @@ export default {
     fetchNote() {
       NotesDataService.getTripNote(this.tripData.tripId)
         .then(response => {
-          // Check if the response data exists and is not null before setting noteContent and noteId
           if (response.data && response.data.text !== null) {
             this.noteContent = response.data.text;
             this.noteId = response.data.noteid;
           } else {
-            // If there's no note, or the note text is null, set default values
             this.noteContent = '';
             this.noteId = null;
           }
         })
         .catch(error => {
-          console.error('Error fetching note:', error);
-          // Check for a 404 error and handle it specifically
           if (error.response && error.response.status === 404) {
-            // If the error is a 404, it means no note exists for this trip.
-            // Set noteContent to an empty string so that Vue does not error out.
             this.noteContent = '';
-            this.noteId = null; // Also ensure noteId is null or appropriately set for a non-existent note.
+            this.noteId = null;
           } else {
-            // Handle other types of errors as appropriate
+            console.error('Error fetching note:', error);
           }
         });
     },
-
     saveNote() {
-      //For now, notes arent attached via author.
       this.loggedInPersonId = 1;
-      // if (!this.loggedInPersonId) {
-      //   console.error('No logged in person ID found');
-      //   return;
-      // }
 
-      // Define noteData within the scope of saveNote method
       const noteData = {
         text: this.noteContent,
         personid: this.loggedInPersonId,
@@ -333,7 +292,6 @@ export default {
       };
 
       if (this.noteId) {
-        // Update the existing note
         NotesDataService.update(this.noteId, noteData)
           .then(() => {
             this.updateTrip();
@@ -343,7 +301,6 @@ export default {
             console.error("Error updating note:", error);
           });
       } else {
-        // Create a new note
         NotesDataService.create(noteData)
           .then(response => {
             this.noteId = response.data.noteid;
@@ -362,14 +319,13 @@ export default {
     },
     handleGearWeightUpdate(newGearWeight) {
       console.log(newGearWeight);
-      // Handle gear weight updates
-      // You can use this method to update the trip data or perform other actions
     },
     updateTrip() {
       const updatedTripData = {
         pilotid: this.editableTripData.pilotId,
         helicopterid: this.editableTripData.helicopterId,
-        triptype: this.editableTripData.triptype
+        triptype: this.editableTripData.triptype,
+        sortingindex: this.editableTripData.sortingindex
       };
 
       TripDataService.update(this.tripData.tripId, updatedTripData)
@@ -378,38 +334,36 @@ export default {
           this.tripData.helicopterId = this.editableTripData.helicopterId;
           this.tripData.pilotId = this.editableTripData.pilotId;
           this.tripData.triptype = this.editableTripData.triptype;
-          //console.log(response);
+          this.tripData.sortingindex = this.editableTripData.sortingindex;
+          console.log('trips need updating');
+          this.$emit('updateTrip'); // Emit the event to refresh trips
         })
         .catch(error => {
           console.error("Error updating trip:", error);
         });
     },
     updateGroupDate({ groupId, newEndDate }) {
-        // Now including tripId in the data sent to the server
-        const tripId = this.tripData.tripId;
-        // Adjusting the call to include tripId as part of the object sent
-        TripDataService.updateGroupDate({ groupId, tripId, newEndDate })
-        // eslint-disable-next-line no-unused-vars
-            .then(response => { 
-                this.$emit('groupDateUpdated', { groupId, newEndDate });
-            })
-            .catch(error => {
-                // Handle error
-                console.error("Error updating group end date:", error);
-            });
+      const tripId = this.tripData.tripId;
+      TripDataService.updateGroupDate({ groupId, tripId, newEndDate })
+      // eslint-disable-next-line no-unused-vars
+        .then(response => {
+          this.$emit('groupDateUpdated', { groupId, newEndDate });
+        })
+        .catch(error => {
+          console.error("Error updating group end date:", error);
+        });
     },
     removeGuide(guideToRemove) {
       this.tripData.guides = this.tripData.guides.filter(guide => guide.personid !== guideToRemove.personid);
-      this.updateTrip(); // Update the trip after removing a guide
+      this.updateTrip();
     },
     removeClient(index) {
       this.tripData.clientids.splice(index, 1);
-      this.updateTrip(); // Update the trip after removing a client
+      this.updateTrip();
     },
     removeReservation(reservationId) {
-      // Emit event to parent component with trip ID and reservation ID
       this.$emit('removeReservationFromTrip', {
-        tripId: this.tripData.tripid,
+        tripId: this.tripData.tripId,
         reservationId: reservationId
       });
       this.updateTrip();
@@ -429,6 +383,22 @@ export default {
           console.error("Error deleting trip:", error);
         });
     },
+    incrementSortingIndex() {
+      if (this.editableTripData.sortingindex < 5) {
+        this.editableTripData.sortingindex++;
+      } else {
+        this.editableTripData.sortingindex = 1;
+      }
+      this.updateTrip();
+    },
+    decrementSortingIndex() {
+      if (this.editableTripData.sortingindex > 1) {
+        this.editableTripData.sortingindex--;
+      } else {
+        this.editableTripData.sortingindex = 5;
+      }
+      this.updateTrip();
+    }
   }
 };
 </script>
@@ -436,18 +406,18 @@ export default {
 <style scoped>
 @media (min-width: 768px) {
   .trip-card .card-header > .pilot-helicopter-container {
-    display: flex; /* Enables flex container */
-    flex-wrap: wrap; /* Allows items to wrap as needed */
+    display: flex;
+    flex-wrap: wrap;
   }
 
   .trip-card .card-header > .pilot-helicopter-container > .pilots-section,
   .trip-card .card-header > .pilot-helicopter-container > .helicopter-section {
-    flex: 1; /* Allows each section to take up equal space */
-    padding-right: 5px; /* Add some spacing between the two sections */
+    flex: 1;
+    padding-right: 5px;
   }
 
   .trip-card .card-header > .pilot-helicopter-container > .helicopter-section {
-    padding-right: 0; /* No padding on the right for the last element */
+    padding-right: 0;
   }
 }
 
@@ -478,10 +448,14 @@ export default {
   margin-bottom: 15px;
 }
 
+.trip-header-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .btn-primary {
-  /* Add this to give the button a red background */
   background-color: var(--primary-text-eph-color);
-  /* Additional styling for the button */
   padding: 5px 10px;
   font-size: 14px;
   color: white;
@@ -492,16 +466,16 @@ export default {
 
 .pilot-helicopter-container {
   display: flex;
-  justify-content: space-between; /* This will ensure the child divs take up equal space */
+  justify-content: space-between;
 }
 
 .pilots-section, .helicopter-section {
-  flex: 1; /* Each section will take up half the space */
-  padding-right: 5px; /* Add some spacing between the two sections */
+  flex: 1;
+  padding-right: 5px;
 }
 
 .helicopter-section {
-  padding-right: 0; /* No padding on the right for the last element */
+  padding-right: 0;
 }
 
 .card-header {
@@ -514,18 +488,13 @@ export default {
   padding: 15px;
 }
 
-/* Add styles for buttons if needed */
-.btn-primary {
-  margin-right: 10px; /* Spacing between buttons */
-}
-
 .notes-container {
-    position: relative;
-  }
+  position: relative;
+}
 
 .notes-container textarea {
   width: 100%;
-  padding-bottom: 30px; /* Make space for the 'Save Note' button */
+  padding-bottom: 30px;
 }
 
 .notes-container .save-note {
@@ -536,10 +505,10 @@ export default {
 }
 
 .selected-guides {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
 
 .guide-tag {
   padding: 5px 10px;
@@ -560,10 +529,10 @@ export default {
 }
 
 .selected-clients {
-    display: flex;
-    flex-wrap: wrap;
-    margin-bottom: 10px;
-  }
+  display: flex;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
 
 .client-tag {
   padding: 5px 10px;
@@ -584,14 +553,14 @@ export default {
 }
 
 .reservations-section {
-  background-color: #f8f9fa; /* Light background for the section */
-  border-top: 2px solid #e9ecef; /* Separating line from the rest of the card */
-  padding-top: 20px; /* Spacing at the top */
+  background-color: #f8f9fa;
+  border-top: 2px solid #e9ecef;
+  padding-top: 20px;
 }
 
 .reservations-section .card-title {
-  color: var(--primary-text-eph-color); /* Title is EPH Color */
-  margin-bottom: 15px; /* Space below the title */
+  color: var(--primary-text-eph-color);
+  margin-bottom: 15px;
 }
 
 .selected-reservations {
@@ -611,7 +580,7 @@ export default {
   font-size: 14px;
 }
 
-.tripnumberheader{
+.tripnumberheader {
   color: var(--primary-text-eph-color);
 }
 
@@ -620,16 +589,42 @@ export default {
   border: none;
   margin-left: 8px;
   cursor: pointer;
-  color: #dc3545; /* Bootstrap danger color for the remove button */
+  color: #dc3545;
 }
 
 .remove-reservation:hover {
   text-decoration: underline;
 }
 
-/* Adjustments for form fields */
 select, textarea {
   width: 100%;
   margin-bottom: 10px;
+}
+
+.sorting-section {
+  display: flex;
+  align-items: center;
+  margin-left: 20px;
+}
+
+.sorting-controls {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+
+.sorting-controls button {
+  background-color: transparent;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  padding: 0 10px;
+  margin: 0 5px;
+  border-radius: 4px;
+  height: 34px;
+}
+
+.sorting-controls span {
+  font-size: 18px;
+  padding: 0 10px;
 }
 </style>

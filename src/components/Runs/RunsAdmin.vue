@@ -13,14 +13,14 @@
         <p>No trips found for the selected date.</p>
       </div>
       <div v-else class="trips-container">
-        <div v-for="(trip, tripIndex) in sortedTrips" :key="trip.tripId" class="trip-card">
+        <div v-for="(trip, tripIndex) in sortedTrips" :key="trip.tripid" class="trip-card">
           <h2>Heli #{{ tripIndex + 1 }} ({{ trip.triptype || '' }})</h2>
           <div class="groups-container">
             <div v-for="(group, groupIndex) in sortedGroups(trip.groups)" :key="group.groupid" class="group-card">
               <h3>Group #{{ groupIndex + 1 }}</h3>
               <div class="form-group-inline">
                 <label for="run">Assign Run:</label>
-                <select v-model="group.selectedRun" @change="assignRunToGroup(trip.tripId, group.groupid, group)">
+                <select v-model="group.selectedRun" @change="assignRunToGroup(trip.tripid, group.groupid, group)">
                   <option disabled value="">Select Run</option>
                   <option v-for="run in runs" :key="run.runid" :value="run.runid">
                     {{ run.runzone }} - {{ run.runname }}
@@ -39,7 +39,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                    <tr v-for="(tripRun, index) in getGroupRuns(trip.tripId, group.groupid)" :key="index">
+                    <tr v-for="(tripRun, index) in getGroupRuns(trip.tripid, group.groupid)" :key="index">
                       <td>{{ getRunName(tripRun.runid) }}</td>
                       <td>{{ getRunZone(tripRun.runid) }}</td>
                       <td>{{ getTotalElevation(tripRun.runid) }}</td>
@@ -48,12 +48,12 @@
                   </tbody>
                 </table>
                 <div class="total-vertical">
-                  Total Vertical: {{ getTotalVertical(trip.tripId, group.groupid) }}
+                  Total Vertical: {{ getTotalVertical(trip.tripid, group.groupid) }}
                 </div>
                 <!-- Notes Section -->
                 <div class="notes-container">
                   <textarea v-model="group.noteContent" placeholder="Enter note here..."></textarea>
-                  <button class="save-note" @click="saveNoteForGroup(trip.tripId, group.groupid, group)">Save Note</button>
+                  <button class="save-note" @click="saveNoteForGroup(trip.tripid, group.groupid, group)">Save Note</button>
                   <transition name="fade">
                     <span v-if="group.noteSaved" class="saved-message">Saved!</span>
                   </transition>
@@ -222,7 +222,15 @@ export default {
       return this.runs.slice().sort((a, b) => a.runname.localeCompare(b.runname));
     },
     sortedTrips() {
-      return this.trips.slice().sort((a, b) => a.tripId - b.tripId);
+      return this.trips.slice().sort((a, b) => {
+        if (a.sortingindex === b.sortingindex) {
+          if (a.tripid === b.tripid) {
+            return a.tripgroupid - b.tripgroupid;
+          }
+          return a.tripid - b.tripid;
+        }
+        return a.sortingindex - b.sortingindex;
+      });
     }
   },
   methods: {
@@ -263,21 +271,33 @@ export default {
     fetchTripsByDate() {
       TripDataService.fetchTripsByDate(this.selectedDate)
         .then(response => {
-          // Sort trips by tripId
-          this.trips = response.data.sort((a, b) => a.tripId - b.tripId);
-
-          // Sort trip groups by groupid within each trip
-          this.trips.forEach(trip => {
-            trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
+          // Sort trips by sortingindex, then tripid, then tripgroupid
+          this.trips = response.data.sort((a, b) => {
+            if (a.sortingindex === b.sortingindex) {
+              if (a.tripid === b.tripid) {
+                return a.tripgroupid - b.tripgroupid;
+              }
+              return a.tripid - b.tripid;
+            }
+            return a.sortingindex - b.sortingindex;
           });
 
-          this.fetchTripRuns(this.trips.map(trip => trip.tripId));
+          // Sort trip groups by sortingindex within each trip
           this.trips.forEach(trip => {
+            trip.groups = trip.groups.sort((a, b) => {
+              if (a.sortingindex === b.sortingindex) {
+                return a.groupid - b.groupid;
+              }
+              return a.sortingindex - b.sortingindex;
+            });
+
             trip.groups.forEach(group => {
               this.$set(group, 'noteSaved', false); // Ensure noteSaved is reactive
-              this.fetchNoteForGroup(trip.tripId, group.groupid, group);
+              this.fetchNoteForGroup(trip.tripid, group.groupid, group);
             });
           });
+
+          this.fetchTripRuns(this.trips.map(trip => trip.tripid));
         })
         .catch(e => {
           console.log(e);
@@ -365,7 +385,7 @@ export default {
         .then(response => {
           console.log("Trip run assigned successfully:", response.data);
           group.selectedRun = ""; // Clear the dropdown after assigning
-          this.fetchTripRuns(this.trips.map(trip => trip.tripId));
+          this.fetchTripRuns(this.trips.map(trip => trip.tripid));
         })
         .catch(e => {
           console.log("Error assigning trip run:", e);
@@ -374,7 +394,7 @@ export default {
     deleteRunFromGroup(tripRunId) {
       RunsZonesDataService.deleteTripRun(tripRunId)
         .then(() => {
-          this.fetchTripRuns(this.trips.map(trip => trip.tripId));
+          this.fetchTripRuns(this.trips.map(trip => trip.tripid));
         })
         .catch(e => {
           console.log("Error deleting trip run:", e);
@@ -403,7 +423,12 @@ export default {
       }, 0);
     },
     sortedGroups(groups) {
-      return groups.slice().sort((a, b) => a.groupid - b.groupid);
+      return groups.slice().sort((a, b) => {
+        if (a.sortingindex === b.sortingindex) {
+          return a.groupid - b.groupid;
+        }
+        return a.sortingindex - b.sortingindex;
+      });
     },
     showDeleteZoneConfirmation(zoneId) {
       this.zoneToDelete = zoneId;
