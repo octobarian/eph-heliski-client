@@ -15,7 +15,7 @@
         </span>
         <span v-else>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up" viewBox="0 0 16 16">
-            <path d="M3.204 11h9.592L8 5.519zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659"/>
+            <path d="M3.204 11h9.592L8 5.519zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566-.647.106-1.659-.753-1.659H3.204a1 1 0 0 1-.753-1.659"/>
           </svg>
         </span>
       </button>
@@ -29,8 +29,21 @@
     <div v-if="!isCollapsed" class="group-details">
       <div class="guide-dropdown">
         <label>Guide: </label>
-        <select v-model="selectedGuideId" @change="refetchFuelPercentage" style="margin-left: 10px;">
+        <select v-model="selectedGuideId" @change="updateGuide" style="margin-left: 10px;">
           <option disabled value="">Select a Guide</option>
+          <option 
+            v-for="availableGuide in allGuides" 
+            :key="availableGuide.staffid" 
+            :value="availableGuide.staffid">
+            {{ availableGuide.person.firstname }} {{ availableGuide.person.lastname }}
+          </option>
+        </select>
+        <button v-if="selectedGuideId && !showAdditionalGuideDropdown" @click="showAdditionalGuideDropdown = true">+</button>
+      </div>
+      <div class="guide-dropdown" v-if="showAdditionalGuideDropdown">
+        <label>Additional Guide: </label>
+        <select v-model="selectedGuideAdditionalId" @change="updateGuide" style="margin-left: 10px;">
+          <option disabled value="">Select an Additional Guide</option>
           <option 
             v-for="availableGuide in allGuides" 
             :key="availableGuide.staffid" 
@@ -87,6 +100,11 @@ export default {
       default: () => null,
       required: false
     },
+    guideAdditional: {
+      type: [Object, null],
+      default: () => null,
+      required: false
+    },
     clients: {
       type: Array,
       default: () => [],
@@ -97,6 +115,17 @@ export default {
     },
     allBeacons: Array,
     groupEndDate: String,
+  },
+  data() {
+    return {
+      isCollapsed: true,
+      localClients: this.clients || [],
+      continueTillDate: this.groupEndDate || '',
+      fuelPercentage: 0,
+      showAdditionalGuideDropdown: !!(this.guideAdditional && this.guideAdditional.guideid),
+      selectedGuideId: this.guide ? this.guide.guideid : '',
+      selectedGuideAdditionalId: this.guideAdditional ? this.guideAdditional.guideid : ''
+    };
   },
   methods: {
     getAgeEmoji(age) {
@@ -195,14 +224,10 @@ export default {
           console.error("Error updating client weight:", error);
         });
     },
-  },
-  data() {
-    return {
-      isCollapsed: true,
-      localClients: this.clients || [],
-      continueTillDate: this.groupEndDate || '',
-      fuelPercentage: 0,
-    };
+    updateGuide() {
+      this.$emit('update-guides', this.groupId, this.selectedGuideId, this.selectedGuideAdditionalId);
+      this.refetchFuelPercentage();
+    }
   },
   watch: {
     clients: {
@@ -212,6 +237,19 @@ export default {
       },
       deep: true,
       immediate: true,
+    },
+    guide: {
+      handler(newValue) {
+        this.selectedGuideId = newValue ? newValue.guideid : '';
+      },
+      immediate: true
+    },
+    guideAdditional: {
+      handler(newValue) {
+        this.selectedGuideAdditionalId = newValue ? newValue.guideid : '';
+        this.showAdditionalGuideDropdown = !!newValue;
+      },
+      immediate: true
     }
   },
   computed: {
@@ -223,25 +261,7 @@ export default {
         const weight = parseInt(client.person && client.person.weight);
         return total + (isNaN(weight) ? 0 : weight);
       }, 0);
-    },
-    selectedGuideId: {
-      get() {
-        if (this.guide && this.guide.guideid) {
-          const matchingGuide = this.allGuides.find(guide => guide.staffid === this.guide.guideid);
-          return matchingGuide ? matchingGuide.staffid : '';
-        }
-        return '';
-      },
-      set(value) {
-        if (value) {
-          let guideObject = this.allGuides.find(guide => guide.staffid === value);
-          if (guideObject) {
-            this.$emit('update:guide', guideObject.staffid, this.groupId);
-            this.refetchFuelPercentage();
-          }
-        }
-      }
-    },
+    }
   },
   created() {
     this.initializeClients();

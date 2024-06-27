@@ -64,10 +64,11 @@
           :heliNumber="tripNumber"
           :groupEndDate="group.end_date"
           :guide="group.guide"
+          :guide-additional="group.guideAdditional"
           :clients="group.clients"
           :all-guides="allGuides"
           :all-beacons="allBeacons"
-          @update:guide="(selectedGuideId, groupId) => handleUpdateGuide(selectedGuideId, groupId)"
+          @update-guides="(groupId, guideId, guideAdditionalId) => handleUpdateGuides(groupId, guideId, guideAdditionalId)"
           @updateEndDate="(data) => updateGroupDate(data)"
           @deleteGroup="() => handleDeleteGroup(group.groupid)"
           @removeGuide="guide => handleRemoveGuide(guide)"
@@ -242,11 +243,14 @@ export default {
           console.error('Error removing client from group:', error);
         });
     },
-    handleUpdateGuide(selectedGuideId, groupId) {
-      TripDataService.updateGroupGuide(groupId, selectedGuideId)
-        .then(() => {})
+    handleUpdateGuides(groupId, guideId, guideAdditionalId) {
+      console.log(`Trying To Update Group ${groupId} with Guide: ${guideId} and addguide: ${guideAdditionalId}`);
+      TripDataService.updateGroupGuides(groupId, guideId, guideAdditionalId)
+        .then(() => {
+          this.$emit('guidesUpdated', groupId);
+        })
         .catch(error => {
-          console.error("Error updating guide:", error);
+          console.error("Error updating guides:", error);
         });
     },
     fetchLoggedInPersonId() {
