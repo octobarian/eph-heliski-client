@@ -3,23 +3,32 @@ import { jsPDF } from "jspdf";
 export default function generateGroupListReport(data) {
   const doc = new jsPDF('portrait');
 
-  // Adding a cover page
-  const addCoverPage = (doc, helicopterIds, groupIds, totalClients, reportDate, helicoptersData) => {
+  let yPos = 10; // Set initial Y position
+
+  doc.setFontSize(18);
+  doc.text("Group List Report", 100, yPos, { align: "center" });
+  yPos += 10; // Adjust position after the title
+  // Commenting Coverpage code, do not need on the report for now
+/*
+  // Adding a cover page 
+  const addCoverPage = (doc, helicopterIds, groupIds, totalClient, reportDate,helicoptersData)  => {
     doc.setFontSize(20);
     doc.text("Client Group List", 10, 20);
     doc.setFontSize(16);
     doc.text(`Eagle Pass Heli`, 10, 30);
     doc.text(`Date: ${reportDate}`, 10, 40);
 
+
+    
     const summaries = [
-      /*{
+      {
         title: 'Heli Breakdown',
         details: `Helicopters: ${helicopterIds.join(', ')}`
       },
       {
         title: 'Groups',
         details: `Group IDs: ${groupIds.join(', ')}`
-      },*/
+      },
       {
         title: 'Total Clients',
         details: `Total Clients: ${totalClients}`
@@ -85,7 +94,7 @@ y+=10;
 
     doc.addPage(); // Add a new page for the detailed reports
   };
-
+*/
   // Drawing the headers for each group section
   
   const drawHeaders = (doc, y) => {
@@ -103,7 +112,7 @@ y+=10;
       doc.setDrawColor(0);
       doc.setFillColor(211, 211, 211);
       doc.rect(x, y, head.width, 10, 'FD');
-      doc.text(head.header, x + 5, y + 7);
+      doc.text(head.header, x + 5, y + 5.5);
       x += head.width;
     });
 
@@ -129,8 +138,8 @@ y+=10;
    
 
   // Assuming 'data' is an array where each entry represents a helicopter's data.
-  const allHelicopterIds = data.map(helicopter => `Heli #${helicopter.heliIndex}`);
-  const allGroupIds = [];
+  //const allHelicopterIds = data.map(helicopter => `Heli #${helicopter.heliIndex}`);
+  /*const allGroupIds = [];
   let totalClients = 0;
 
   data.forEach(helicopter => {
@@ -138,30 +147,30 @@ y+=10;
       allGroupIds.push(`Group #${group.groupIndex}`);
       totalClients += group.clients.length;
     });
-  });
+  });*/
 
   // Get today's date for the cover page
   const today = new Date();
   const reportDate = `${today.getFullYear()}-${(today.getMonth() + 1).toString().padStart(2, '0')}-${today.getDate().toString().padStart(2, '0')}`;
 
   // Pass this data to the cover page function
-  addCoverPage(doc, allHelicopterIds, allGroupIds, totalClients, reportDate, helicoptersData);
+  //addCoverPage(doc, allHelicopterIds, allGroupIds, totalClients, reportDate, helicoptersData);
 
   data.forEach((helicopter, index) => {
     if (index > 0) doc.addPage();
-    doc.setFontSize(16);
+    doc.setFontSize(14);
     doc.text(`Heli #${helicopter.heliIndex}`, 10, 20);
-    doc.text(`Pilot: ${helicopter.pilot}`, 10, 30);
-    let y = 40;
+    doc.text(`Pilot: ${helicopter.pilot}`, 10, 25);
+    let y = 38;
 
     helicopter.groups.forEach(group => {
-      doc.setFontSize(14);
+      doc.setFontSize(12);
       doc.text(`Group #${group.groupIndex}`, 10, y - 5);
       y = drawHeaders(doc, y);
-      y += 5;
+      y += 3;
       let rectWidth = 50; // Width of each 50 column
       let rectWidth30 = 30; // Width of each 50 column
-      let rectHeight = 10; // Height of each row
+      let rectHeight = 8; // Height of each row
 
 //try guide here
 
@@ -194,7 +203,7 @@ y+=10;
         doc.rect(x-5, y-5, rectWidth30, rectHeight, 'FD');
         doc.text('N/A', x, y); // Placeholder for allergies
         doc.setTextColor(0, 0, 0);
-        y += 10;
+        y += 8;
       }
 
       group.clients.forEach(client => {
@@ -232,11 +241,11 @@ y+=10;
           }
        doc.text(client.hasAllergies ? "YES" : "NO", x, y);
         doc.setTextColor(0);
-        y += 10;
+        y += 8;
       });
 
       doc.text(`Fuel Percentage: ${group.fuelPercentage}%`, 10, y);
-      y += 20;
+      y += 15;
     });
   });
 

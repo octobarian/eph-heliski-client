@@ -27,7 +27,7 @@ export default function generateMedicalReport(data, date) {
   ];
 
   // Set font size for headers
-  doc.setFontSize(12);
+  doc.setFontSize(10);
 
   // Check for page overflow
   const checkPageOverflow = (yPosition) => {
@@ -43,11 +43,11 @@ export default function generateMedicalReport(data, date) {
     yPos = checkPageOverflow(yPos);
 
     // Helicopter header
-    doc.setFontSize(14);
+    doc.setFontSize(10);
     doc.setTextColor(0, 0, 0); // Set text color to black
     doc.text(`Heli #${helicopter.heliIndex}: ${helicopter.helicopterId}`, 10, yPos);
     doc.text(`Date: ${reportDate}`, 160, yPos); //Date of the report
-    yPos += 10;
+    yPos += 5;
     doc.setFillColor(200, 200, 200); //Change the RGB color to light grey
 
     helicopter.groups.forEach(group => {
@@ -55,33 +55,37 @@ export default function generateMedicalReport(data, date) {
 
       // Group header with background color
       doc.setFillColor(200, 215, 1); // RGB color for yellow background
-      doc.rect(10, yPos, headerConfig.reduce((sum, hc) => sum + hc.width, 0), 8, 'F'); // Draw filled rectangle for header background
+      doc.rect(10, yPos, headerConfig.reduce((sum, hc) => sum + hc.width, 0), 5, 'F'); // Draw filled rectangle for header background
       doc.setTextColor(0, 0, 0); // Set text color to black
-      doc.setFontSize(12);
-      doc.text(`Group #${group.groupIndex}`, 12, yPos + 5);
-      yPos += 10;
+      doc.setFontSize(10);
+      doc.text(`Group #${group.groupIndex}`, 12, yPos + 4);
+      yPos += 5;
 
       // Print headers with background color
       headerConfig.forEach((header) => {
+        //doc.setFillColor(211, 211, 211); // RGB color for grey background
+        doc.rect(10, yPos+1, headerConfig.reduce((sum, hc) => sum + hc.width, 0), 5); // Draw filled rectangle for header background
+        //doc.setFontSize(10);
         doc.setTextColor(0, 0, 0); // Reset text color to black
         doc.text(header.header, header.startPos + 2, yPos + 5); // Add text over the fill
       });
 
-      yPos += 12; // Adding space for data entries
+      yPos += 10; // Adding space for data entries
       var biggestExtraSpace = 0;
 
       group.clients.forEach(client => {
         yPos = checkPageOverflow(yPos);
+        doc.setTextColor(0, 0, 0);
         // Iterate through each client and print their details
         headerConfig.forEach((col) => {
           let text;
           switch (col.header) {
             case "Last Name":
-              doc.setFontSize(12);
+              doc.setFontSize(10);
               text = client.lastName || "";
               break;
             case "First Name":
-              doc.setFontSize(12);
+              doc.setFontSize(10);
               text = client.firstName || "";
               break;
             case "Medical Con":
@@ -93,10 +97,10 @@ export default function generateMedicalReport(data, date) {
               text = client.customFields[col.header] ? client.customFields[col.header].trim() : "";
               break;
             default:
-              doc.setFontSize(12); // Reset to default font size for other fields
+              doc.setFontSize(10); // Reset to default font size for other fields
               text = "";
           }
-          doc.text(text, col.startPos, yPos, { maxWidth: col.width - 2 }); // Adjust text within column width
+          doc.text(text, col.startPos + 2, yPos, { maxWidth: col.width - 2 }); // Adjust text within column width
           var fieldLength = text.split(/\r\n|\r|\n/).length; // Count the number of lines
           var extraSpace;
 
@@ -106,9 +110,9 @@ export default function generateMedicalReport(data, date) {
           } else {
             // If no newlines, check if text length is greater than 20
             if (text.length > 20) {
-              extraSpace = 3; // If text length is greater than 20, set extraSpace to 2
+              extraSpace = 4.5; // If text length is greater than 20, set extraSpace to 2
             } else if (text.length > 40) {
-              extraSpace = 5;
+              extraSpace = 6;
             } else {
               extraSpace = 0; // Otherwise, no extra space needed
             }
@@ -119,7 +123,7 @@ export default function generateMedicalReport(data, date) {
         biggestExtraSpace = 0;
       });
 
-      yPos += 10; // Additional space after each group
+      yPos += 1; // Additional space after each group
     });
   });
 
