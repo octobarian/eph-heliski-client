@@ -1,5 +1,9 @@
 <template>
-  <div class="admin-dashboard">
+  <div v-if="loading" class="loading-screen">
+    <img style="width:20px; height:20px" src="@/assets/hamster.gif" alt="Loading..." />
+    <p>Loading, please wait...</p>
+  </div>
+  <div v-else class="admin-dashboard">
     <div class="main-content">
       <div class="header">
         <h1>Admin Dashboard</h1>
@@ -62,6 +66,7 @@ export default {
       helicopters: [],
       unassignedReservations: [],
       beacons: [],
+      loading: true, // Loading state
     };
   },
   methods: {
@@ -73,14 +78,29 @@ export default {
     },
     handleDateChange() {
       this.storeDate(this.selectedDate);
-      this.fetchTripsByDate();
+      this.fetchAllData();
+    },
+    async fetchAllData() {
+      this.loading = true;
+      try {
+        await Promise.all([
+          this.fetchTripsByDate(),
+          this.fetchPilots(),
+          this.fetchGuides(),
+          this.fetchHelicopters(),
+          this.fetchBeacons(),
+          this.fetchUnassignedReservations(),
+        ]);
+      } catch (error) {
+        console.error("Error fetching data:", error);
+      } finally {
+        this.loading = false;
+      }
     },
     fetchTripsByDate() {
-      TripDataService.fetchTripsByDate(this.selectedDate)
+      return TripDataService.fetchTripsByDate(this.selectedDate)
         .then(response => {
-          console.log('Fetching Trips')
           this.trips = response.data.map(trip => {
-            console.log(trip);
             trip.groups = trip.groups.sort((a, b) => a.groupid - b.groupid);
             return trip;
           }).sort((a, b) => a.sortingindex - b.sortingindex || a.tripid - b.tripid); // Sort by sortingindex, then by tripid
@@ -89,10 +109,9 @@ export default {
           console.error("Error fetching trips:", error);
           this.trips = []; // Reset trips on error
         });
-      this.fetchUnassignedReservations();
     },
     fetchUnassignedReservations() {
-      ReservationDataService.findByDate(this.selectedDate)
+      return ReservationDataService.findByDate(this.selectedDate)
         .then(response => {
           this.unassignedReservations = response.data;
         })
@@ -152,7 +171,7 @@ export default {
       this.fetchTripsByDate();
     },
     fetchPilots() {
-      TripDataService.fetchPilots()
+      return TripDataService.fetchPilots()
         .then(response => {
           this.pilots = response.data;
         })
@@ -161,7 +180,7 @@ export default {
         });
     },
     fetchGuides() {
-      TripDataService.fetchGuides()
+      return TripDataService.fetchGuides()
         .then(response => {
           this.guides = response.data;
         })
@@ -170,7 +189,7 @@ export default {
         });
     },
     fetchHelicopters() {
-      TripDataService.fetchHelicopters()
+      return TripDataService.fetchHelicopters()
         .then(response => {
           this.helicopters = response.data;
         })
@@ -179,7 +198,7 @@ export default {
         });
     },
     fetchBeacons() {
-      EquipmentDataService.getAllBeacons() 
+      return EquipmentDataService.getAllBeacons() 
         .then(response => {
           this.beacons = response.data;
         })
@@ -189,11 +208,7 @@ export default {
     },
   },
   created() {
-    this.fetchTripsByDate();
-    this.fetchPilots();
-    this.fetchGuides();
-    this.fetchHelicopters();
-    this.fetchBeacons();
+    this.fetchAllData();
   }
 };
 </script>
@@ -266,6 +281,21 @@ export default {
   top: 20px;
 }
 
+.loading-screen {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  text-align: center;
+}
+
+.loading-screen img {
+  width: 100px;
+  height: 100px;
+  margin-bottom: 20px;
+}
+
 @media (max-width: 991px) {
   .admin-dashboard {
     flex-direction: column;
@@ -279,7 +309,4 @@ export default {
     top: unset;
   }
 }
-
-
-/* Additional styles here */
 </style>

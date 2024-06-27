@@ -14,6 +14,10 @@ class EquipmentDataService {
         return http.post("/equipment/beacon", data);
     }
 
+    updateBeacon(id, data) {
+        return http.put(`/equipment/beacon/${id}`, data);
+    }
+
     deleteBeacon(id) {
         return http.delete(`/equipment/beacon/${id}`);
     }

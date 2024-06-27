@@ -8,7 +8,7 @@
         <input type="password" v-model="password" placeholder="Password" class="login-input"/>
         <button @click="login" class="login-button">Log In</button>
       </div>
-      <div v-if="authState" class="authStateBox">{{ authState }}</div>
+      <div v-if="authState" class="authStateBox" :class="{ 'error': authState === 'Invalid email or password' }">{{ authState }}</div>
     </div>
   </div>
 </template>
@@ -26,6 +26,15 @@ export default {
   methods: {
     login() {
       this.$emit('login', this.email, this.password);
+    }
+  },
+  watch: {
+    authState(newValue) {
+      if (newValue) {
+        setTimeout(() => {
+          this.$emit('clearAuthState');
+        }, 5000);
+      }
     }
   }
 };
@@ -76,6 +85,11 @@ export default {
   display: inline-block;
   color: #a0a0a0;  /* Gray text color */
   font-weight: bold;
+}
+
+.authStateBox.error {
+  background-color: #ffdddd;
+  color: red;
 }
 
 .login-input {

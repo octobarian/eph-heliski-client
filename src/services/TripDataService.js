@@ -34,9 +34,15 @@ class TripDataService {
     return http.post(`/trips/group/${tripId}`);
   }  
 
-  updateGroupGuide(groupId, guideId) {
-    return http.put(`/trips/group/${groupId}/guide`, { guideId });
+  // Replaced with multi-guide setting
+  // updateGroupGuide(groupId, guideId) {
+  //   return http.put(`/trips/group/${groupId}/guide`, { guideId });
+  // }
+
+  updateGroupGuides(groupId, guideId, guideAdditionalId) {
+    return http.put(`/trips/group/${groupId}/guide`, { guideId, guideAdditionalId });
   }
+
 
   updateGroupDate({ groupId, tripId, newEndDate }) {
     return http.put(`/trips/groupDate/${tripId}/${groupId}`, { end_date: newEndDate });
