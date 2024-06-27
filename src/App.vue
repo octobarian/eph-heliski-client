@@ -6,7 +6,7 @@
         <h1><i class="header-icon"></i> MECHSKI</h1>
       </header>
       <div id="container">
-        <Greet v-if="!authenticated" @login="login" />
+        <Greet v-if="!authenticated" @login="login" :authState="authState" @clearAuthState="clearAuthState" />
       </div>
     </div>
     <div v-if="authenticated && (role=='office' || role=='admin')">
@@ -65,7 +65,7 @@
                 Equipment
               </a>
               <ul class="dropdown-menu" aria-labelledby="equipmentDropdown">
-                <router-link to="/beaconlist" class="dropdown-item">Beacons</router-link>
+                <router-link to="/beaconlist" class="dropdown-item">Transceivers</router-link>
                 <router-link to="/helicopterlist" class="dropdown-item">Helicopters</router-link>
                 <router-link to="/shuttlelist" class="dropdown-item">Shuttles</router-link>
               </ul>
@@ -215,7 +215,7 @@ export default {
           sessionStorage.setItem('role', this.role);
           sessionStorage.setItem('email', this.email);
         } else {
-          this.authState = 'notAuthorized';
+          this.authState = 'Invalid email or password';
         }
       })
       .catch(error => {
@@ -265,6 +265,9 @@ export default {
         clearInterval(this.zauiStatusCheckInterval);
       }
     },
+    clearAuthState() {
+      this.authState = null;
+    }
   },
   mounted() {
     this.fetchZauiStatus();
@@ -286,7 +289,6 @@ export default {
   }
 }
 </script>
-
 
 <style>
 /* Style adjustments for mobile view and responsive behavior */

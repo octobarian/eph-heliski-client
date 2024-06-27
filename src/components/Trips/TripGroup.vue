@@ -15,7 +15,7 @@
         </span>
         <span v-else>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-caret-up" viewBox="0 0 16 16">
-            <path d="M3.204 11h9.592L8 5.519zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753-1.659H3.204a1 1 0 0 1-.753-1.659"/>
+            <path d="M3.204 11h9.592L8 5.519zm-.753-.659 4.796-5.48a1 1 0 0 1 1.506 0l4.796 5.48c.566.647.106 1.659-.753 1.659H3.204a1 1 0 0 1-.753-1.659"/>
           </svg>
         </span>
       </button>
@@ -49,16 +49,21 @@
           <div v-for="(client, index) in localClients" :key="client.reservationid" class="client-card">
             <div class="row client-information-sections">
               <span class="age-emoji" :style="getAgeStyle(client.person.age)">{{ getAgeEmoji(client.person.age) }}</span>
-              {{ client.person.firstname }} {{ client.person.lastname }} 
+              {{ client.person.firstname }} {{ client.person.lastname }}
               <button class="remove-client-btn" @click="emitRemoveClient(client, index)">x</button>
             </div>
             <div class="row beacon-selection-section">
+              <label>Transceivers:</label>
               <select v-model="client.selectedBeaconId" @change="onBeaconSelect(index)">
                 <option disabled value="">Select a Beacon</option>
                 <option v-for="beacon in allBeacons" :key="beacon.beaconid" :value="beacon.beaconid">
                   {{ beacon.beaconnumber }}
                 </option>
               </select>
+            </div>
+            <div class="row weight-input-section">
+              <label>Weight:</label>
+              <input type="number" v-model.number="client.person.weight" @change="updateClientWeight(client)" />
             </div>
           </div>
         </div>
@@ -70,6 +75,7 @@
 <script>
 import EquipmentDataService from '@/services/EquipmentDataService';
 import TripDataService from '@/services/TripDataService';
+import ClientsDataService from '@/services/ClientsDataService';
 
 export default {
   props: {
@@ -161,6 +167,8 @@ export default {
       }
     },
     initializeClients() {
+      console.log('Clients Below');
+      console.log(this.clients);
       this.localClients = this.clients.map(client => ({
         ...client,
         selectedBeaconId: client.beacon ? client.beacon.beaconid : null,
@@ -174,7 +182,19 @@ export default {
         .catch(error => {
           console.error("Error fetching fuel percentage:", error);
         });
-    }
+    },
+    updateClientWeight(client) {
+      const updateData = {
+        weight: client.person.weight,
+      };
+      ClientsDataService.updateWeight(client.person.id, updateData)
+        .then(() => {
+          this.refetchFuelPercentage();
+        })
+        .catch(error => {
+          console.error("Error updating client weight:", error);
+        });
+    },
   },
   data() {
     return {
@@ -358,17 +378,28 @@ export default {
   padding: 10px;
   display: flex;
   flex-direction: column;
+  align-items: center; /* Center justify items horizontally */
   gap: 10px;
 }
 
-.client-information-section, .beacon-selection-section {
+.client-information-section, .beacon-selection-section, .weight-input-section {
   display: flex;
   align-items: center;
   gap: 10px;
 }
 
-.beacon-selection-section select {
+.beacon-selection-section select, .weight-input-section input {
   flex-grow: 1;
+  max-width: 100px; /* Adjust the width of the inputs */
+  margin-left: 20px;
+  padding-left: 20px;
+}
+
+.beacon-selection-section label, .weight-input-section label {
+  font-size: 12px; /* Make the label text smaller */
+  color: #333; /* Dark grey text */
+  margin-bottom: 0; /* Remove bottom margin */
+  
 }
 
 .client-tag:hover {

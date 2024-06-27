@@ -22,35 +22,33 @@
             <div class="form-group-inline">
               <label for="shuttleNumber">Shuttle Number:</label>
               <select v-model="client.shuttleNumber" @change="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)">
-                <option disabled value="">Select Shuttle</option>
+                <option value="">Unassigned</option>
                 <option v-for="shuttle in shuttles" :key="shuttle.id" :value="shuttle.id">
                   {{ shuttle.shuttlename }}
                 </option>
               </select>
             </div>
             <div class="form-group-inline">
-              <label for="pickupTime">Pickup Time:</label>
-              <input type="time" v-model="client.flightTime" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+              <label :class="{ disabled: !client.shuttleNumber }" for="pickupTime">Pickup Time:</label>
+              <input type="time" v-model="client.flightTime" @change="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" :disabled="!client.shuttleNumber" />
             </div>
             <div class="form-group-inline">
-              <label for="pickupLocation">Pickup Location:</label>
-              <input type="text" v-model="client.pickupLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+              <label :class="{ disabled: !client.shuttleNumber }" for="pickupLocation">Pickup Location:</label>
+              <input type="text" v-model="client.pickupLocation" @change="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" :disabled="!client.shuttleNumber" />
             </div>
             <div class="form-group-inline">
-              <label for="arrivalTime">Arrival Time:</label>
-              <input type="time" v-model="client.arrivalTime" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+              <label :class="{ disabled: !client.shuttleNumber }" for="arrivalTime">Arrival Time:</label>
+              <input type="time" v-model="client.arrivalTime" @change="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" :disabled="!client.shuttleNumber" />
             </div>
             <div class="form-group-inline">
-              <label for="dropoffLocation">Dropoff Location:</label>
-              <input type="text" v-model="client.dropoffLocation" @blur="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" />
+              <label :class="{ disabled: !client.shuttleNumber }" for="dropoffLocation">Dropoff Location:</label>
+              <input type="text" v-model="client.dropoffLocation" @change="updateClientShuttle(trip.tripId, group.groupid, client.tripClientId)" :disabled="!client.shuttleNumber" />
             </div>
             <div class="form-group-inline training-status">
               <label for="trainingStatus">Training Status:</label>
+              <input type="checkbox" id="trainingCheckbox" v-model="client.person.isTrained" @change="toggleTraining(client.person)" />
               <div v-if="client.person && hasTrainingType1(client.person.trainings)">
                 <div class="training-date" @dblclick="editTrainingDate(client.person)">{{ getTrainingDate(client.person.trainings) }}</div>
-              </div>
-              <div v-else>
-                <input type="checkbox" id="trainingCheckbox" @change="addTraining(client.person)" />
               </div>
             </div>
           </div>
@@ -115,6 +113,15 @@ export default {
             }
           }
         }
+
+        // Set isTrained flag based on trainings
+        for (const trip of this.trips) {
+          for (const group of trip.groups) {
+            for (const client of group.clients) {
+              client.person.isTrained = this.hasTrainingType1(client.person.trainings);
+            }
+          }
+        }
       } catch (error) {
         console.error("Error fetching trips:", error);
         this.trips = [];
@@ -148,8 +155,19 @@ export default {
         tripclientid: client.tripClientId
       };
 
+      if (client.shuttleNumber === '') {
+        updateData.shuttleNumber = null; // Unassign shuttle if the value is blank
+      }
+
       ShuttleDataService.updateGroupShuttle(tripId, groupId, clientId, updateData)
         .then(() => {
+          if (updateData.shuttleNumber === null) {
+            // If the shuttle was unassigned, clear the fields
+            client.dropoffLocation = '';
+            client.arrivalTime = '';
+            client.flightTime = '';
+            client.pickupLocation = '';
+          }
           console.log("Client shuttle details updated successfully.");
         })
         .catch(error => {
@@ -163,44 +181,42 @@ export default {
       const training = trainings.find(training => training.trainingtypeid === 1);
       return training ? training.trainingdate : null;
     },
-    async addTraining(person) {
+    async updateTraining(person, trainingdate) {
       try {
         const response = await TripDataService.updateTraining({
           personid: person.id,
           trainingtypeid: 1,
-          trainingdate: this.selectedDate
+          trainingdate: trainingdate
         });
 
-        if (response.status === 201) {
-          console.log("Training added successfully:", response.data);
-          person.trainings.push({
-            trainingtypeid: 1,
-            trainingname: 'Avalanche Safety and Helicopter safety training',
-            trainingdate: this.selectedDate
-          });
-        }
-      } catch (error) {
-        console.error("Error adding training status:", error);
-      }
-    },
-    async editTrainingDate(person) {
-      try {
-        const response = await TripDataService.updateTraining({
-          personid: person.id,
-          trainingtypeid: 1,
-          trainingdate: this.selectedDate
-        });
-
-        if (response.status === 200) {
+        if (response.status === 200 || response.status === 201) {
           console.log("Training date updated successfully:", response.data);
           const training = person.trainings.find(training => training.trainingtypeid === 1);
           if (training) {
-            training.trainingdate = this.selectedDate;
+            if (trainingdate === null) {
+              // Remove training if trainingdate is null
+              const index = person.trainings.indexOf(training);
+              person.trainings.splice(index, 1);
+            } else {
+              // Update training date
+              training.trainingdate = this.selectedDate;
+            }
+          } else if (trainingdate !== null) {
+            // Add new training if not present
+            person.trainings.push({
+              trainingtypeid: 1,
+              trainingname: 'Avalanche Safety and Helicopter safety training',
+              trainingdate: this.selectedDate
+            });
           }
         }
       } catch (error) {
         console.error("Error updating training date:", error);
       }
+    },
+    toggleTraining(person) {
+      const trainingdate = person.isTrained ? this.selectedDate : null;
+      this.updateTraining(person, trainingdate);
     },
     sortedGroups(groups) {
       return groups.slice().sort((a, b) => a.sortingindex - b.sortingindex || a.groupid - b.groupid);
@@ -283,6 +299,10 @@ export default {
 
 .form-group-inline label {
   font-weight: bold;
+}
+
+.form-group-inline label.disabled {
+  color: lightgrey;
 }
 
 .form-group-inline select,

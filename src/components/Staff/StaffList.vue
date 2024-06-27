@@ -18,12 +18,23 @@
             <th scope="col">First Name</th>
             <th scope="col">Last Name</th>
             <th scope="col">Email</th>
-            <th scope="col">Job Title</th>
+            <th scope="col">
+              <div class="d-flex justify-content-between align-items-center">
+                <span>Job Title</span>
+                <div>
+                  <label for="jobTitleFilter" class="visually-hidden">Filter by Job Title:</label>
+                  <select class="form-select" id="jobTitleFilter" v-model="selectedJobTitle" @change="filterStaffByJobTitle">
+                    <option value="">All</option>
+                    <option v-for="job in jobs" :key="job.jobid" :value="job.jobtitle">{{ job.jobtitle }}</option>
+                  </select>
+                </div>
+              </div>
+            </th>
             <th scope="col">Actions</th>
           </tr>
         </thead>
         <tbody>
-          <tr v-for="(staff, index) in staffs" :key="staff.staffid">
+          <tr v-for="(staff, index) in filteredStaffs" :key="staff.staffid">
             <th scope="row">{{ index + 1 }}</th>
             <td>{{ staff.person.firstname }}</td>
             <td>{{ staff.person.lastname }}</td>
@@ -110,21 +121,31 @@ export default {
       },
       staffs: [],
       jobs: [],
-      searchName: ""
+      searchName: "",
+      selectedJobTitle: ""
     };
+  },
+  computed: {
+    filteredStaffs() {
+      if (this.selectedJobTitle === "inactive") {
+        return this.staffs.filter(staff => staff.job && staff.job.jobtitle === "inactive");
+      } else if (this.selectedJobTitle) {
+        return this.staffs.filter(staff => staff.job && staff.job.jobtitle === this.selectedJobTitle);
+      } else {
+        return this.staffs.filter(staff => !staff.job || staff.job.jobtitle !== "inactive");
+      }
+    }
   },
   methods: {
     retrieveStaff() {
       StaffDataService.getAll()
         .then(response => {
           this.staffs = response.data;
-          console.log(response.data);
         })
         .catch(e => {
           console.log(e);
         });
     },
-
     saveNewStaff() {
       const newStaffData = {
         jobid: this.jobs.find(job => job.jobtitle === this.newStaff.jobTitle).jobid,
@@ -145,7 +166,6 @@ export default {
 
       StaffDataService.create(newStaffData)
         .then(response => {
-          console.log(response.data);
           this.staffs.push(response.data.staff);
           this.closeModalAndReset();
           this.retrieveStaff(); // Refetch the staff list
@@ -154,20 +174,16 @@ export default {
           console.error("Error creating staff:", error);
         });
     },
-
     closeModalAndReset() {
-      // Hide the modal
       const modal = this.$refs.createStaffModal;
       modal.style.display = 'none';
       document.body.classList.remove('modal-open');
-      
-      // Remove the modal's backdrop
+
       const backdrop = document.querySelector('.modal-backdrop');
       if (backdrop) {
         backdrop.parentNode.removeChild(backdrop);
       }
 
-      // Reset the form fields
       this.newStaff = {
         firstName: '',
         lastName: '',
@@ -178,7 +194,6 @@ export default {
         role: 'office'
       };
     },
-
     fetchJobs() {
       StaffDataService.fetchJobs()
         .then(response => {
@@ -188,16 +203,17 @@ export default {
           console.log(e);
         });
     },
-
     searchNameMethod() {
       StaffDataService.findByName(this.searchName)
         .then(response => {
           this.staffs = response.data;
-          console.log(response.data);
         })
         .catch(e => {
           console.log(e);
         });
+    },
+    filterStaffByJobTitle() {
+      this.retrieveStaff(); // You might want to refetch the staff list if needed
     }
   },
   mounted() {
@@ -212,5 +228,13 @@ export default {
   text-align: left;
   max-width: 950px;
   margin: auto;
+}
+
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group select {
+  max-width: 150px; /* Adjust the width to match the Job Title column */
 }
 </style>
