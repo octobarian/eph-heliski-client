@@ -46,7 +46,7 @@ export default {
       selectAll: false,
       selectedDate: this.getStoredDate() || new Date().toISOString().substr(0, 10),
       reportTypes: [
-        'Trips Overview',
+        'Guide Report',
         'Medical Report',
         'Lunch Report',
         'Shuttle Report',
@@ -69,7 +69,7 @@ export default {
     generateReports() {
       this.selectedReportTypes.forEach(reportType => {
         switch (reportType) {
-          case 'Trips Overview':
+          case 'Guide Report':
             this.generateDateTripsOverview();
             break;
           case 'Medical Report':

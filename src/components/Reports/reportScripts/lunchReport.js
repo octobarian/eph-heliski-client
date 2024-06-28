@@ -18,21 +18,123 @@ export default function generateLunchReport(data) {
   doc.text("Group Lunch Report", 148, yPos, { align: "center" });
   yPos += 10; // Adjust position after the title
 
+//Adding a cover page 
+const addCoverPage = (doc)  => {
+  doc.setTextColor(0, 0, 0);
+  doc.setFontSize(16);
+  doc.text(`Eagle Pass Heli`, 10, 30);
+  doc.text(`Date: `, 10, 40);
+
+  
+  // Drawing the headers for main page table 
+  doc.setTextColor(primaryColor);
+  doc.setFontSize(14);
+  doc.text(`Client with Dietary Restrictions`, 10, 60);
+  let y = 65;  
+//build table here
+const drawMainHeaders = (doc, y) => {
+  doc.setTextColor(0, 0, 0);
+doc.setFontSize(12);
+doc.setFont('helvetica','bold');
+const Mainheaders = [
+  { mainheader: 'Last Name', width: 45 },
+  { mainheader: 'First Name', width: 45 },
+  { mainheader: 'Dietary Restrictions', width: 70 },
+  { mainheader: 'Cannot Eat', width: 80 },
+  { mainheader: 'Severity', width: 40 }
+];
+
+let x = 10;
+Mainheaders.forEach(mainhead => {
+  doc.setDrawColor(0);
+  doc.setFillColor(211, 211, 211);
+  doc.rect(x, y, mainhead.width, 10, 'FD');
+  doc.text(mainhead.mainheader, x + 5, y + 7);
+  x += mainhead.width;
+});
+doc.setFont('helvetica','normal');
+return y + 10;
+};
+
+  y = drawMainHeaders(doc, y);
+  y += 5;
+  doc.setFontSize(10);
+  data.forEach(helicopter => {
+    helicopter.groups.forEach(group => {
+      group.clients.forEach(client => {
+        let x =15;
+        let rectHeight =12;
+        // Dietary Restrictions checkbox
+        if (client.dietaryRestrictions) {
+          doc.setTextColor(redColor);
+          // Draw rectangle for 'Last Name' column
+          doc.setDrawColor(0);
+          doc.setFillColor(255, 255, 255); // White fill for 'Last Name' column
+          doc.rect(x-5, y-5, 45, rectHeight, 'FD');
+          doc.text(client.lastName, x, y);
+          x+=45; // Width of each column
+
+          // Draw rectangle for 'First Name' column
+          doc.setDrawColor(0);
+          doc.setFillColor(255, 255, 255); // White fill for 'First Name column
+          doc.rect(x-5, y-5, 45, rectHeight, 'FD');
+          doc.text(client.firstName, x, y);
+          x+=45; // Width of each column
+
+          // Draw rectangle for 'Dietary Restriction' column
+          doc.setDrawColor(0);
+          doc.setFillColor(255, 255, 255); // White fill for 'Dietary Restriction' column
+          doc.rect(x-5, y-5, 70, rectHeight, 'FD');
+          doc.text("Yes", x, y);
+          x+=70; // Width of each column
+
+          // Draw rectangle for 'Cannot Eat' column
+          doc.setDrawColor(0);
+          doc.setFillColor(255, 255, 255); // White fill for 'Cannot Eat' column
+          doc.rect(x-5, y-5, 80, rectHeight, 'FD');
+          const cannotEatLines = splitTextToLines(client.cannotEat || "N/A", 45);
+          cannotEatLines.forEach((line, index) => {
+            doc.text(line, x, y + (index * 5));
+          });
+          x+=80; // Width of each column
+
+          // Draw rectangle for 'Severity' column
+          doc.setDrawColor(0);
+          doc.setFillColor(255, 255, 255); // White fill for 'Severity' column
+          doc.rect(x-5, y-5, 40, rectHeight, 'FD');
+          doc.text(client.severity, x, y);
+          
+          
+        }
+        
+        
+      })
+    })
+  });
+
+
+  doc.addPage(); // Add a new page for the detailed reports
+};
+
+
+
   const checkPageOverflow = (yPosition) => {
-    if (yPosition >= 200) {
+    if (yPosition >= 180) {
       doc.addPage('landscape');
       return 20; // Reset yPos for new page
     }
     return yPosition;
   };
+  // Pass this data to the cover page function
+  addCoverPage(doc);
 
   // Define headers and their respective positions and widths
   const headers = [
     { title: "Last Name", x: 10, width: 45 },
     { title: "First Name", x: 55, width: 45 },
-    { title: "Diet?", x: 100, width: 20 }, // Shortened title and adjusted width
-    { title: "Cannot Eat", x: 120, width: 80 },
-    { title: "Severity", x: 200, width: 40 },
+    { title: "Dietary Restriction", x: 100, width: 70 }, // Shortened title and adjusted width
+    { title: "Cannot Eat", x: 170, width: 80 },
+    { title: "Severity", x: 250, width: 40 },
   ];
 
   // Define a function to draw headers
@@ -40,9 +142,9 @@ export default function generateLunchReport(data) {
     doc.setFillColor(0); // Set fill color to black for headers
     headers.forEach(header => {
       doc.setFillColor(0);
-      doc.rect(header.x, y, header.width, 8, 'F'); // Draw filled rectangles for header background
+      doc.rect(header.x, y, header.width, 5, 'F'); // Draw filled rectangles for header background
       doc.setTextColor(255, 255, 255); // Set text color to white for header titles
-      doc.text(header.title, header.x + (header.width / 2), y + 6, { align: "center" }); // Center the header title
+      doc.text(header.title, header.x + (header.width / 2), y + 3.5, { align: "center" }); // Center the header title
     });
     doc.setTextColor(0, 0, 0); // Reset text color to black for other text
   };
@@ -52,7 +154,7 @@ export default function generateLunchReport(data) {
   data.forEach(helicopter => {
     helicopter.groups.forEach(group => {
 
-      if (groupCount > 0 && groupCount % 2 === 0) {
+      if (groupCount > 0 && groupCount % 4 === 0) {
         doc.addPage('landscape');
         yPos = 20; // Reset yPos for new page
       }
@@ -64,11 +166,11 @@ export default function generateLunchReport(data) {
       doc.setFontSize(14);
       doc.setTextColor(primaryColor); // Set group header color to primary color
       doc.text(`Heli #${helicopter.heliIndex} - Group #${group.groupIndex}`, 10, yPos);
-      yPos += 10; // Move down for headers
-
+      yPos += 3; // Move down for headers
+      doc.setFontSize(11);
       // Draw the headers
       drawHeaders(yPos);
-      yPos += 13; // Adjust Y position after headers to provide space for client details
+      yPos += 9; // Adjust Y position after headers to provide space for client details
 
       // Client details
       group.clients.forEach(client => {
@@ -98,10 +200,10 @@ export default function generateLunchReport(data) {
         });
         doc.text(client.severity || "N/A", headers[4].x, yPos);
 
-        yPos += 10; // Increment yPos for the next client
+        yPos += 5; // Increment yPos for the next client
       });
 
-      yPos += (groupCount % 2 === 0) ? 20 : 10; 
+      yPos += (groupCount % 4 === 0) ? 20 : 5; 
     });
 
     // Calculate and display total lunches

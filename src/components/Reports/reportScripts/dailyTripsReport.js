@@ -45,25 +45,28 @@ export default function generateGuideReport(data) {
   const drawHeaders = (doc, y) => {
     doc.setFontSize(10);
     const headers = [
-      { header: 'Last Name', width: 40 },
-      { header: 'First Name', width: 40 },
-      { header: 'Weight', width: 30 },
-      { header: 'Beacon', width: 30 },
-      { header: 'Medical', width: 30 },
-      { header: 'Dietary', width: 30 },
-      { header: 'Ski/Snowboard', width: 40 }
+      { header: 'Last Name', width: 30 },
+      { header: 'First Name', width: 30 },
+      { header: 'Group Code', width: 30 },
+      { header: 'Training', width: 30 },
+      { header: 'New Guest', width: 30 },
+      { header: 'Country', width: 40 },
+      { header: 'Ability', width: 20 },
+      { header: 'Ski/Snowboard', width: 30 },
+      { header: 'DOB', width: 20 },
+      { header: 'Room', width: 20 }
     ];
 
     let x = 10;
     headers.forEach(head => {
       doc.setDrawColor(0);
       doc.setFillColor(211, 211, 211);
-      doc.rect(x, y, head.width, 10, 'FD');
-      doc.text(head.header, x + 5, y + 7);
+      doc.rect(x, y, head.width, 7, 'FD');
+      doc.text(head.header, x + 5, y + 5);
       x += head.width;
     });
 
-    return y + 10;
+    return y + 6;
   };
 
   // Assuming 'data' is an array where each entry represents a helicopter's data.
@@ -83,14 +86,14 @@ export default function generateGuideReport(data) {
 
   data.forEach((helicopter, index) => {
     if (index > 0) doc.addPage('landscape');
-    doc.setFontSize(16);
-    doc.text(`Heli #${helicopter.heliIndex}`, 10, 20);
-    doc.text(`Pilot: ${helicopter.pilot}`, 10, 30);
-    let y = 40;
+    doc.setFontSize(12);
+    doc.text(`Heli #${helicopter.heliIndex}`, 10, 10);
+    doc.text(`Pilot: ${helicopter.pilot}`, 10, 15);
+    let y = 30;
 
     helicopter.groups.forEach(group => {
       let totalWeight = 0;
-      doc.setFontSize(14);
+      doc.setFontSize(11);
       doc.text(`Group #${group.groupIndex}`, 10, y - 5);
       y = drawHeaders(doc, y);
       y += 5;
@@ -98,28 +101,33 @@ export default function generateGuideReport(data) {
       group.clients.forEach(client => {
         let x = 10;
         doc.setFontSize(10);
-        doc.text(client.lastName, x, y);
-        x += 40;
-        doc.text(client.firstName, x, y);
-        x += 40;
-        doc.text(client.weight.toString(), x, y);
+        doc.text(client.lastName, x+3, y);
+        x += 30;
+        doc.text(client.firstName, x+3, y);
+        x += 30;
+        doc.text("Group Code", x+3, y);
         totalWeight += parseInt(client.weight);
         x += 30;
-        doc.text(client.beacon, x, y);
+        doc.text("Training", x+3, y);
         x += 30;
-        doc.setTextColor(client.medical_fields ? 255 : 0, 0, 0);
-        doc.text(client.medical_fields ? "YES" : "NO", x, y);
+        //doc.setTextColor(client.medical_fields ? 255 : 0, 0, 0);
+        doc.text("New Guest", x+3, y);
         x += 30;
-        doc.setTextColor(client.dietary_fields ? 255 : 0, 0, 0);
-        doc.text(client.dietary_fields ? "YES" : "NO", x, y);
-        doc.setTextColor(0);
+        //doc.setTextColor(client.dietary_fields ? 255 : 0, 0, 0);
+        doc.text("Country", x+4, y);
+        x += 40;
+        doc.text("Ability", x+3, y);
+        x += 20;
+        doc.text(client.ridertype || 'N/A', x+4, y);
         x += 30;
-        doc.text(client.ridertype || 'N/A', x, y);
-        y += 10;
+        doc.text("DOB", x+3, y);
+        x += 20;
+        doc.text("Room", x+1, y);
+        y += 5;
       });
 
-      doc.text(`Total Weight: ${totalWeight}lb`, 10, y + 5);
-      y += 20;
+      doc.text(`Total Weight: ${totalWeight}lb`, 10, y + 2);
+      y += 15;
     });
   });
 
