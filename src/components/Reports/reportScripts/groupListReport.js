@@ -5,10 +5,24 @@ export default function generateGroupListReport(data) {
 
   let yPos = 10; // Set initial Y position
 
+  let latestReportDate = null;
+  data.forEach(helicopter => {
+    if (helicopter.reportDate) {
+      const currentDate = new Date(helicopter.reportDate);
+      if (!latestReportDate || currentDate > latestReportDate) {
+        latestReportDate = currentDate;
+      }
+    }
+  });
+
+  // Format the latest report date
+  const formattedDate = latestReportDate ? latestReportDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
   doc.setFontSize(18);
-  doc.text("Group List Report", 100, yPos, { align: "center" });
+  doc.text(`Group List Report ${formattedDate}`, 100, yPos, { align: "center" });
   yPos += 10; // Adjust position after the title
-  // Commenting Coverpage code, do not need on the report for now
+
+// Commenting Coverpage code, do not need on the report for now
 /*
   // Adding a cover page 
   const addCoverPage = (doc, helicopterIds, groupIds, totalClient, reportDate,helicoptersData)  => {
@@ -95,8 +109,8 @@ y+=10;
     doc.addPage(); // Add a new page for the detailed reports
   };
 */
+
   // Drawing the headers for each group section
-  
   const drawHeaders = (doc, y) => {
     doc.setFontSize(10);
     const headers = [

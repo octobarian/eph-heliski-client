@@ -3,12 +3,24 @@ import { jsPDF } from "jspdf";
 export default function generateShuttleReport(data) {
   const doc = new jsPDF('landscape');
 
+  let latestReportDate = null;
+  data.forEach(shuttle => {
+    if (shuttle.reportDate) {
+      const currentDate = new Date(shuttle.reportDate);
+      if (!latestReportDate || currentDate > latestReportDate) {
+        latestReportDate = currentDate;
+      }
+    }
+  });
+
+  const formattedDate = latestReportDate ? latestReportDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
   // Adding a cover page
   const addCoverPage = (doc, shuttleNames) => {
     doc.setFontSize(20);
     doc.text("Shuttle Report", 10, 20);
     doc.setFontSize(16);
-    doc.text(`Report Date: ${new Date().toISOString().substr(0, 10)}`, 10, 30);
+    doc.text(`Report Date: ${formattedDate}`, 10, 30);
 
     const summaries = [
       {

@@ -7,6 +7,20 @@ export default function generateLunchReport(data) {
     format: "a4",
   });
 
+  let latestReportDate = null;
+  data.forEach(helicopter => {
+    if (helicopter.reportDate) {
+      const currentDate = new Date(helicopter.reportDate);
+      if (!latestReportDate || currentDate > latestReportDate) {
+        latestReportDate = currentDate;
+      }
+    }
+  });
+
+  // Format the latest report date
+  const formattedDate = latestReportDate ? latestReportDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
+
   let yPos = 10; // Set initial Y position
   const primaryColor = '#c8d701'; // Set primary color
   const blueColor = '#596787';
@@ -23,7 +37,7 @@ const addCoverPage = (doc)  => {
   doc.setTextColor(0, 0, 0);
   doc.setFontSize(16);
   doc.text(`Eagle Pass Heli`, 10, 30);
-  doc.text(`Date: `, 10, 40);
+  doc.text(`Date: ${formattedDate}`, 10, 40);
 
   
   // Drawing the headers for main page table 

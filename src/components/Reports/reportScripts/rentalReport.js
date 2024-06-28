@@ -7,6 +7,21 @@ export default function generateRentalReport(data) {
     format: "a4",
   });
 
+  let latestReportDate = null;
+  data.forEach(helicopter => {
+    if (helicopter.reportDate) {
+      const currentDate = new Date(helicopter.reportDate);
+      if (!latestReportDate || currentDate > latestReportDate) {
+        latestReportDate = currentDate;
+      }
+    }
+  });
+
+  // Format the latest report date
+  const formattedDate = latestReportDate ? latestReportDate.toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+
+  console.log(data);
+  
   let yPos = 10; // Set initial Y position
   const primaryColor = '#c8d701'; // Set primary color
   const redColor = '#f04e26'; // Set red color
@@ -19,7 +34,7 @@ export default function generateRentalReport(data) {
 
   doc.setFontSize(18);
   doc.setTextColor(primaryColor); // Set title color to primary color
-  doc.text("Rental Report", 148, yPos, { align: "center" });
+  doc.text(`Rental Report ${formattedDate}`, 148, yPos, { align: "center" });
   yPos += 7; // Adjust position after the title
 
   // Add summary line at the top
